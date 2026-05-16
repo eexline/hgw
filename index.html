@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>TEXOR AI</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <script src="js/telegram-web-app.js"></script>
+</head>
+<body>
+    <svg width="0" height="0" style="position:absolute">
+        <defs>
+            <!-- Custom Premium Icons -->
+            <symbol id="icon-pair" viewbox="0 0 24 24">
+                <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z" fill="#0f1a2e" stroke="#38bdf8" stroke-width="1.5"></path>
+                <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" stroke="#38bdf8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+            </symbol>
+            <symbol id="icon-time" viewbox="0 0 24 24">
+                <circle cx="12" cy="12" r="9" stroke="#64748b" stroke-width="2" fill="none"></circle>
+                <path d="M12 7v5l3 3" stroke="#38bdf8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+            </symbol>
+            <symbol id="icon-acc" viewbox="0 0 24 24">
+                <circle cx="12" cy="12" r="10" stroke="#64748b" stroke-width="2" fill="none"></circle>
+                <circle cx="12" cy="12" r="3" fill="#4ade80"></circle>
+                <path d="M12 2v2M12 20v2M2 12h2M20 12h2" stroke="#64748b" stroke-width="2" stroke-linecap="round"></path>
+            </symbol>
+            <symbol id="icon-up" viewbox="0 0 24 24">
+                <path d="M13 5l7 7-7 7M5 12h16" stroke="currentColor" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round" transform="rotate(-45 12 12)"></path>
+            </symbol>
+            <symbol id="icon-down" viewbox="0 0 24 24">
+                <path d="M13 5l7 7-7 7M5 12h16" stroke="currentColor" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round" transform="rotate(45 12 12)"></path>
+            </symbol>
+            <symbol id="icon-win" viewbox="0 0 24 24">
+                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" fill="none" stroke="#4ade80" stroke-width="2" stroke-linejoin="round"></path>
+            </symbol>
+            <symbol id="icon-lose" viewbox="0 0 24 24">
+                <path d="M12 22c5.5 0 10-4.5 10-10S17.5 2 12 2 2 6.5 2 12s4.5 10 10 10z" stroke="#fb7185" stroke-width="2" fill="none"></path>
+                <path d="M15 9l-6 6M9 9l6 6" stroke="#fb7185" stroke-width="2" stroke-linecap="round"></path>
+            </symbol>
+            <symbol id="icon-nav-home" viewbox="0 0 24 24">
+                <rect x="3" y="13" width="4" height="8" rx="1" fill="currentColor"></rect>
+                <rect x="10" y="8" width="4" height="13" rx="1" fill="currentColor"></rect>
+                <rect x="17" y="4" width="4" height="17" rx="1" fill="currentColor"></rect>
+            </symbol>
+            <symbol id="icon-nav-profile" viewbox="0 0 24 24">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"></path>
+                <circle cx="12" cy="7" r="4" stroke="currentColor" stroke-width="2" fill="none"></circle>
+            </symbol>
+            <symbol id="icon-lock" viewbox="0 0 24 24">
+                <rect x="5" y="11" width="14" height="10" rx="2" ry="2" stroke="#fb7185" stroke-width="2" fill="none"></rect>
+                <path d="M8 11V7a4 4 0 0 1 8 0v4" stroke="#fb7185" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"></path>
+            </symbol>
+        </defs>
+    </svg>
+
+    <div class="app-background"></div>
+    <div class="blue-glow-top"></div>
+
+    <header class="header">
+        <div class="top-row">
+            <div class="brand-title">TEXOR <span class="highlight">AI</span></div>
+            <div class="right-controls">
+                <button type="button" class="lang-btn" id="langBtn" aria-label="Change language">
+                    <img id="currentLangFlag" class="lang-btn-flag" src="img/flags/gb.svg" alt="en">
+                </button>
+                <div class="user-pill">
+                    <img id="userAvatar" class="avatar" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="user">
+                    <span id="userInfo">Guest</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Language Modal -->
+    <div class="modal hidden" id="langModal">
+        <div class="modal-content lang-modal-content">
+            <div class="modal-header">
+                <span data-i18n="select_language">Select Language</span>
+                <button id="closeLangBtn" class="modal-close">×</button>
+            </div>
+            <div class="lang-list">
+                <div class="lang-item" data-lang="ru">
+                    <img src="img/flags/ru.svg" class="lang-flag" alt="ru">
+                    <span class="lang-name">Русский</span>
+                </div>
+                <div class="lang-item selected" data-lang="en">
+                    <img src="img/flags/gb.svg" class="lang-flag" alt="en">
+                    <span class="lang-name">English</span>
+                </div>
+                <div class="lang-item" data-lang="uz">
+                    <img src="img/flags/uz.svg" class="lang-flag" alt="uz">
+                    <span class="lang-name">O'zbek</span>
+                </div>
+                <div class="lang-item" data-lang="hi">
+                    <img src="img/flags/in.svg" class="lang-flag" alt="hi">
+                    <span class="lang-name">हिन्दी</span>
+                </div>
+                <div class="lang-item" data-lang="pt">
+                    <img src="img/flags/br.svg" class="lang-flag" alt="pt">
+                    <span class="lang-name">Português</span>
+                </div>
+                <div class="lang-item" data-lang="ar">
+                    <img src="img/flags/sa.svg" class="lang-flag" alt="ar">
+                    <span class="lang-name">العربية</span>
+                </div>
+                <div class="lang-item" data-lang="kz">
+                    <img src="img/flags/kz.svg" class="lang-flag" alt="kz">
+                    <span class="lang-name">Қазақша</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal hidden" id="pairModal">
+        <div class="modal-content lang-modal-content pair-modal-content">
+            <div class="modal-header">
+                <span data-i18n="select_pair">Select pair</span>
+                <button type="button" id="closePairBtn" class="modal-close" aria-label="Close">×</button>
+            </div>
+            <div class="pair-modal-search-wrap">
+                <input type="search" id="pairSearchInput" class="pair-search-input" data-i18n-placeholder="pair_search_placeholder" placeholder="Search pair..." autocomplete="off" enterkeyhint="search">
+            </div>
+            <div class="pair-list lang-list" id="pairList"></div>
+        </div>
+    </div>
+
+    <div id="homeView" class="app-view">
+    <div class="main-content">
+        <!-- Market Type Toggle -->
+        <div class="market-toggle-container">
+            <div class="toggle-slider"></div>
+            <button class="market-btn active" id="btnRegular" data-i18n="market_regular">Regular</button>
+            <button class="market-btn" id="btnOTC" data-i18n="market_otc">OTC</button>
+        </div>
+
+        <!-- Filters Row -->
+        <div class="filters-container">
+            <div class="pair-picker custom-select" id="pairPicker">
+                <button type="button" class="select-trigger" id="pairSelectTrigger" aria-haspopup="dialog" aria-controls="pairModal">
+                    <div class="flag-icon" id="pairFlagDisplay"></div>
+                    <span id="pairTextDisplay">EUR/USD</span>
+                    <span class="chevron">▼</span>
+                </button>
+                <select id="pair" class="visually-hidden-select" tabindex="-1" aria-hidden="true">
+                    <option value="EURUSD">EUR/USD</option>
+                    <option value="GBPUSD">GBP/USD</option>
+                    <option value="USDJPY">USD/JPY</option>
+                    <option value="USDCHF">USD/CHF</option>
+                    <option value="USDCAD">USD/CAD</option>
+                    <option value="AUDUSD">AUD/USD</option>
+                    <option value="GBPJPY">GBP/JPY</option>
+                    <option value="EURJPY">EUR/JPY</option>
+                    <option value="EURGBP">EUR/GBP</option>
+                    <option value="EURCAD">EUR/CAD</option>
+                    <option value="GBPCHF">GBP/CHF</option>
+                    <option value="CADJPY">CAD/JPY</option>
+                    <option value="AUDCAD">AUD/CAD</option>
+                    <option value="AUDJPY">AUD/JPY</option>
+                    <option value="EURCHF">EUR/CHF</option>
+                    <option value="CADCHF">CAD/CHF</option>
+                </select>
+            </div>
+
+            <div class="custom-select small">
+                <div class="select-trigger">
+                    <span id="tfTextDisplay">1m</span>
+                    <span class="chevron">▼</span>
+                </div>
+                <select id="timeframe">
+                    <option value="1m">1m</option>
+                    <option value="3m">3m</option>
+                    <option value="5m">5m</option>
+                    <option value="15m">15m</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Main Signal Card -->
+        <div class="signal-card-container" id="mainCard">
+            <div class="card-glow-border"></div>
+            <div class="card-content">
+                <div class="card-header-row">
+                    <span class="card-label" data-i18n="signal_label">SIGNAL</span>
+                    <span id="resultStamp" class="result-stamp hidden">WIN</span>
+                </div>
+
+                <div class="card-body">
+                    <div class="signal-pair">
+                        <div id="cardPairFlags" class="signal-pair__flags big-flags">🇪🇺🇺🇸</div>
+                        <div class="signal-pair__text">
+                            <span class="signal-pair__label" data-i18n="pair_label">Currency Pair</span>
+                            <span id="metaPair" class="signal-pair__name big-value">EUR/USD</span>
+                        </div>
+                    </div>
+
+                    <div class="signal-grid">
+                        <div class="signal-chip" id="chipTf">
+                            <span class="signal-chip__label" data-i18n="tf_label">Timeframe</span>
+                            <span id="metaTf" class="signal-chip__value value">1m</span>
+                        </div>
+                        <div class="signal-chip" id="chipAcc">
+                            <span class="signal-chip__label" data-i18n="accuracy_label">Accuracy</span>
+                            <span id="metaAcc" class="signal-chip__value value accent">--%</span>
+                        </div>
+                    </div>
+
+                    <div class="signal-dir direction-block" id="dirBlock">
+                        <div class="signal-dir__icon-wrap">
+                            <svg id="dirIcon" class="signal-dir__icon icon-big" viewBox="0 0 24 24" aria-hidden="true">
+                                <use id="dirIconUse" href="#icon-up"></use>
+                            </svg>
+                        </div>
+                        <div class="signal-dir__meta">
+                            <span class="signal-dir__label" data-i18n="direction_label">Direction</span>
+                            <span id="metaDir" class="signal-dir__value dir-text">--</span>
+                        </div>
+                        <div class="signal-dir__until dir-timer hidden" aria-hidden="true">
+                            <span class="until-label" data-i18n="until_label">until</span>
+                            <span id="metaUntil" class="until-val">--:--</span>
+                        </div>
+                    </div>
+
+                    <div class="signal-progress progress-container">
+                        <div id="progressTrack" class="signal-progress__track progress-track">
+                            <div id="progressBar" class="signal-progress__fill progress-fill" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"></div>
+                        </div>
+                        <div class="signal-progress__meta progress-labels">
+                            <span id="statusText" data-i18n="waiting_status">Waiting...</span>
+                            <span id="progressLabel">0%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Big Action Button -->
+        <div class="action-area">
+            <button id="getSignalBtn" class="mega-btn">
+                <span data-i18n="get_signal_btn">GET SIGNAL</span>
+                <div class="btn-glow"></div>
+            </button>
+        </div>
+
+        <!-- TradingView Chart -->
+        <div class="chart-wrapper">
+            <div class="chart-header" data-i18n="live_chart">LIVE CHART</div>
+            <div class="chart-container">
+                <iframe id="chartFrame" src="https://s.tradingview.com/widgetembed/?symbol=FX:EURUSD&interval=1&theme=dark" style="width:100%; height:100%; border:0;"></iframe>
+                
+                <!-- OTC Placeholder -->
+                <div id="chartPlaceholder" class="chart-placeholder hidden">
+                    <div class="placeholder-content">
+                        <div class="placeholder-icon">!</div>
+                        <div class="placeholder-title" data-i18n="chart_unavailable">Chart Unavailable</div>
+                        <div class="placeholder-desc" data-i18n="chart_otc_desc">Chart is not available for OTC pairs</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="spinner-overlay hidden" id="spinnerOverlay">
+            <div class="search-loader" aria-hidden="true">
+                <span class="search-loader__ring"></span>
+                <span class="search-loader__ring"></span>
+                <span class="search-loader__ring"></span>
+                <span class="search-loader__core"></span>
+            </div>
+            <p class="search-loader__text spinner-text" data-i18n="searching_signal">SEARCHING SIGNAL...</p>
+            <div class="search-loader__bar"><span></span></div>
+        </div>
+    </div>
+    </div>
+
+    <div id="profileView" class="app-view hidden">
+        <div class="main-content profile-page" id="profileRoot">
+            <section class="profile-hero">
+                <div class="profile-hero__avatar-wrap">
+                    <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="" id="profileAvatar" class="profile-hero__avatar">
+                </div>
+                <h1 id="profileName" class="profile-hero__name">Guest</h1>
+                <p id="userSubtitle" class="profile-hero__username">@username</p>
+            </section>
+            <div class="profile-stat-grid">
+                <div class="profile-stat-card">
+                    <span class="profile-stat-card__label" data-i18n="total_signals">Total Signals</span>
+                    <span id="totalSignals" class="profile-stat-card__value">0</span>
+                </div>
+                <div class="profile-stat-card profile-stat-card--wins">
+                    <span class="profile-stat-card__label" data-i18n="stat_wins">Wins</span>
+                    <span id="winCount" class="profile-stat-card__value profile-stat-card__value--green">0</span>
+                </div>
+                <div class="profile-stat-card profile-stat-card--rate">
+                    <span class="profile-stat-card__label" data-i18n="win_rate_label">Win Rate</span>
+                    <span id="winRate" class="profile-stat-card__value profile-stat-card__value--accent">0%</span>
+                </div>
+            </div>
+
+            <h2 class="profile-section-title" data-i18n="history_title">TRADING HISTORY</h2>
+            <div class="filter-tabs profile-filter-tabs" role="tablist">
+                <button type="button" class="filter-tab active" data-period="today" data-i18n="filter_today">Today</button>
+                <button type="button" class="filter-tab" data-period="week" data-i18n="filter_week">Week</button>
+                <button type="button" class="filter-tab" data-period="month" data-i18n="filter_month">Month</button>
+                <button type="button" class="filter-tab" data-period="all" data-i18n="filter_all">All</button>
+            </div>
+            <div id="historyList" class="history-list" aria-live="polite"></div>
+        </div>
+    </div>
+
+    <nav class="bottom-nav">
+        <button type="button" class="nav-item active" data-view="home">
+            <svg class="nav-icon-svg"><use href="#icon-nav-home"></use></svg>
+            <span data-i18n="nav_home">HOME</span>
+        </button>
+        <button type="button" class="nav-item" data-view="profile">
+            <svg class="nav-icon-svg"><use href="#icon-nav-profile"></use></svg>
+            <span data-i18n="nav_profile">PROFILE</span>
+        </button>
+    </nav>
+
+    <!-- Alert Modal -->
+    <div id="alertModal" class="modal hidden">
+        <div class="modal-content alert-modal-content">
+            <div class="alert-icon-wrapper">
+                <svg class="alert-icon-svg"><use href="#icon-lock"></use></svg>
+            </div>
+            <h3 class="alert-title" data-i18n="alert_title">Signal Unavailable</h3>
+            <p class="alert-desc" data-i18n="alert_desc">You cannot get a new signal right now because the previous signal is still active. Please wait for the timeframe to end.</p>
+            <button id="closeAlertBtn" class="alert-btn" data-i18n="alert_btn_got_it">Got it</button>
+        </div>
+    </div>
+
+    <script src="js/app.js"></script>
+</body>
+</html>

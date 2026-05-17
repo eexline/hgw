@@ -1,1557 +1,1823 @@
-const cryptoPairs = [
-    { symbol: "BTC/USD", name: "Bitcoin / US Dollar", hot: true },
-    { symbol: "ETH/USD", name: "Ethereum / US Dollar", hot: true },
-    { symbol: "SOL/USD", name: "Solana / US Dollar", hot: false },
-    { symbol: "BNB/USD", name: "Binance Coin / US Dollar", hot: false },
-    { symbol: "XRP/USD", name: "Ripple / US Dollar", hot: false }
-];
 
-const stocksList = [
-    { symbol: "AAPL", name: "Apple Inc.", hot: true },
-    { symbol: "GOOGL", name: "Alphabet Inc.", hot: true },
-    { symbol: "MSFT", name: "Microsoft", hot: false },
-    { symbol: "TSLA", name: "Tesla", hot: false },
-    { symbol: "AMZN", name: "Amazon", hot: false }
-];
 
-const OTC_FOREX_ROWS = [
-    ["EUR/USD", "Euro / US Dollar", true],
-    ["GBP/USD", "British Pound / US Dollar", true],
-    ["USD/JPY", "US Dollar / Japanese Yen", true],
-    ["AUD/USD", "Australian Dollar / US Dollar", true],
-    ["USD/CAD", "US Dollar / Canadian Dollar", true],
-    ["NZD/USD", "New Zealand Dollar / US Dollar", true],
-    ["USD/CHF", "US Dollar / Swiss Franc", true],
-    ["EUR/GBP", "Euro / British Pound", true],
-    ["EUR/JPY", "Euro / Japanese Yen", true],
-    ["GBP/JPY", "British Pound / Japanese Yen", true],
-    ["EUR/AUD", "Euro / Australian Dollar", false],
-    ["EUR/CAD", "Euro / Canadian Dollar", false],
-    ["EUR/NZD", "Euro / New Zealand Dollar", false],
-    ["EUR/CHF", "Euro / Swiss Franc", false],
-    ["EUR/SEK", "Euro / Swedish Krona", false],
-    ["EUR/NOK", "Euro / Norwegian Krone", false],
-    ["EUR/DKK", "Euro / Danish Krone", false],
-    ["EUR/PLN", "Euro / Polish Zloty", false],
-    ["EUR/CZK", "Euro / Czech Koruna", false],
-    ["EUR/HUF", "Euro / Hungarian Forint", false],
-    ["EUR/TRY", "Euro / Turkish Lira", false],
-    ["GBP/AUD", "British Pound / Australian Dollar", false],
-    ["GBP/CAD", "British Pound / Canadian Dollar", false],
-    ["GBP/CHF", "British Pound / Swiss Franc", false],
-    ["GBP/NZD", "British Pound / New Zealand Dollar", false],
-    ["GBP/SEK", "British Pound / Swedish Krona", false],
-    ["GBP/NOK", "British Pound / Norwegian Krone", false],
-    ["GBP/ZAR", "British Pound / South African Rand", false],
-    ["AUD/JPY", "Australian Dollar / Japanese Yen", false],
-    ["AUD/CAD", "Australian Dollar / Canadian Dollar", false],
-    ["AUD/NZD", "Australian Dollar / New Zealand Dollar", false],
-    ["AUD/CHF", "Australian Dollar / Swiss Franc", false],
-    ["AUD/SGD", "Australian Dollar / Singapore Dollar", false],
-    ["CAD/JPY", "Canadian Dollar / Japanese Yen", false],
-    ["CAD/CHF", "Canadian Dollar / Swiss Franc", false],
-    ["CHF/JPY", "Swiss Franc / Japanese Yen", false],
-    ["NZD/JPY", "New Zealand Dollar / Japanese Yen", false],
-    ["NZD/CAD", "New Zealand Dollar / Canadian Dollar", false],
-    ["NZD/CHF", "New Zealand Dollar / Swiss Franc", false],
-    ["USD/MXN", "US Dollar / Mexican Peso", false],
-    ["USD/ZAR", "US Dollar / South African Rand", false],
-    ["USD/TRY", "US Dollar / Turkish Lira", false],
-    ["USD/SEK", "US Dollar / Swedish Krona", false],
-    ["USD/NOK", "US Dollar / Norwegian Krone", false],
-    ["USD/DKK", "US Dollar / Danish Krone", false],
-    ["USD/HUF", "US Dollar / Hungarian Forint", false],
-    ["USD/PLN", "US Dollar / Polish Zloty", false],
-    ["USD/CZK", "US Dollar / Czech Koruna", false],
-    ["USD/THB", "US Dollar / Thai Baht", false],
-    ["USD/SGD", "US Dollar / Singapore Dollar", false],
-    ["USD/HKD", "US Dollar / Hong Kong Dollar", false],
-    ["USD/INR", "US Dollar / Indian Rupee", false],
-    ["USD/KRW", "US Dollar / South Korean Won", false],
-    ["USD/CNH", "US Dollar / Chinese Yuan", false],
-    ["USD/BRL", "US Dollar / Brazilian Real", false],
-    ["USD/CLP", "US Dollar / Chilean Peso", false],
-    ["USD/COP", "US Dollar / Colombian Peso", false],
-    ["USD/ARS", "US Dollar / Argentine Peso", false],
-    ["USD/ILS", "US Dollar / Israeli Shekel", false],
-    ["USD/RUB", "US Dollar / Russian Ruble", false],
-    ["USD/IDR", "US Dollar / Indonesian Rupiah", false],
-    ["USD/MYR", "US Dollar / Malaysian Ringgit", false],
-    ["USD/PHP", "US Dollar / Philippine Peso", false],
-    ["USD/VND", "US Dollar / Vietnamese Dong", false],
-    ["XAU/USD", "Gold / US Dollar", false],
-    ["XAG/USD", "Silver / US Dollar", false]
-];
 
-const OTC_CRYPTO_ROWS = [
-    ["BTC/USD", "Bitcoin / US Dollar", true],
-    ["ETH/USD", "Ethereum / US Dollar", true],
-    ["SOL/USD", "Solana / US Dollar", true],
-    ["XRP/USD", "Ripple / US Dollar", true],
-    ["BNB/USD", "BNB / US Dollar", true],
-    ["LTC/USD", "Litecoin / US Dollar", false],
-    ["BCH/USD", "Bitcoin Cash / US Dollar", false],
-    ["ADA/USD", "Cardano / US Dollar", false],
-    ["DOT/USD", "Polkadot / US Dollar", false],
-    ["LINK/USD", "Chainlink / US Dollar", false],
-    ["UNI/USD", "Uniswap / US Dollar", false],
-    ["AVAX/USD", "Avalanche / US Dollar", false],
-    ["MATIC/USD", "Polygon / US Dollar", false],
-    ["DOGE/USD", "Dogecoin / US Dollar", false],
-    ["SHIB/USD", "Shiba Inu / US Dollar", false],
-    ["TRX/USD", "TRON / US Dollar", false],
-    ["XLM/USD", "Stellar / US Dollar", false],
-    ["ATOM/USD", "Cosmos / US Dollar", false],
-    ["ETC/USD", "Ethereum Classic / US Dollar", false],
-    ["FIL/USD", "Filecoin / US Dollar", false],
-    ["NEAR/USD", "NEAR Protocol / US Dollar", false],
-    ["APT/USD", "Aptos / US Dollar", false],
-    ["ARB/USD", "Arbitrum / US Dollar", false],
-    ["OP/USD", "Optimism / US Dollar", false],
-    ["INJ/USD", "Injective / US Dollar", false],
-    ["SUI/USD", "Sui / US Dollar", false],
-    ["TON/USD", "Toncoin / US Dollar", false],
-    ["XMR/USD", "Monero / US Dollar", false],
-    ["AAVE/USD", "Aave / US Dollar", false],
-    ["ALGO/USD", "Algorand / US Dollar", false],
-    ["SAND/USD", "The Sandbox / US Dollar", false],
-    ["MANA/USD", "Decentraland / US Dollar", false],
-    ["AXS/USD", "Axie Infinity / US Dollar", false],
-    ["CRV/USD", "Curve DAO / US Dollar", false],
-    ["MKR/USD", "Maker / US Dollar", false],
-    ["GRT/USD", "The Graph / US Dollar", false],
-    ["FTM/USD", "Fantom / US Dollar", false],
-    ["PEPE/USD", "Pepe / US Dollar", false],
-    ["WIF/USD", "dogwifhat / US Dollar", false],
-    ["BONK/USD", "Bonk / US Dollar", false],
-    ["EOS/USD", "EOS / US Dollar", false],
-    ["ZEC/USD", "Zcash / US Dollar", false]
-];
 
-function mapStandardPairRows(rows) {
-    return rows.map(([symbol, name, hot]) => ({
-        symbol,
-        name,
-        hot: !!hot
-    }));
+function resolveApiUrl() {
+    if (typeof window === "undefined") return "/api";
+    const host = window.location.hostname;
+    if (host === "localhost" || host === "127.0.0.1") {
+        return "http://127.0.0.1:8000";
+    }
+    return "/api";
 }
 
-function mapOtcPairRows(rows) {
-    return rows.map(([symbol, name, hot]) => ({
-        symbol: symbol + " (OTC)",
-        name: name + " (OTC)",
-        hot: !!hot
-    }));
+const API_URL = resolveApiUrl();
+const FLAGS_PATH = "img/flags";
+const FLAGS_CDN = "https://hatscripts.github.io/circle-flags/flags";
+
+function flagImgUrl(code) {
+    return `${FLAGS_PATH}/${code}.svg`;
 }
 
-const forexPairs = mapStandardPairRows(OTC_FOREX_ROWS);
-const forexOtcPairs = mapOtcPairRows(OTC_FOREX_ROWS);
-const cryptoOtcPairs = mapOtcPairRows(OTC_CRYPTO_ROWS);
+function flagImgTag(code, className, alt) {
+    const cdn = `${FLAGS_CDN}/${code}.svg`;
+    const local = flagImgUrl(code);
+    return `<img src="${local}" class="${className}" alt="${alt}" onerror="this.onerror=null;this.src='${cdn}'">`;
+}
 
-const PAIR_MARKET_TOGGLE_ASSETS = ["forex", "crypto"];
-
-const timeframes = ["5s", "10s", "15s", "30s", "1m", "3m", "5m", "15m"];
-
-const TIMEFRAME_COOLDOWN_MS = {
-    "5s": 5 * 1000,
-    "10s": 10 * 1000,
-    "15s": 15 * 1000,
-    "30s": 30 * 1000,
-    "1m": 60 * 1000,
-    "3m": 3 * 60 * 1000,
-    "5m": 5 * 60 * 1000,
-    "15m": 15 * 60 * 1000
+const LANG_FLAG_FILES = {
+    ru: "ru",
+    en: "gb",
+    uz: "uz",
+    hi: "in",
+    pt: "br",
+    ar: "sa",
+    kz: "kz",
 };
 
-const ASSET_META = {
-    forex: { titleKey: "pairs.forex.title", subKey: "pairs.forex.sub", labelKey: "asset.forex.title", defaultPair: "EUR/USD" },
-    crypto: { titleKey: "pairs.crypto.title", subKey: "pairs.crypto.sub", labelKey: "asset.crypto.title", defaultPair: "BTC/USD" },
-    stocks: { titleKey: "pairs.stocks.title", subKey: "pairs.stocks.sub", labelKey: "asset.stocks.title", defaultPair: "AAPL" }
-};
-
-const FLOW_SCREENS = ["assetScreen", "pairsScreen", "timeframeScreen", "signalScreen"];
-
-const LEADERBOARD_PERIODS = {
-    today: { labelKey: "lb.today", count: 7, trades: [52, 280], profit: [0.45, 2.8] },
-    week: { labelKey: "lb.week", count: 8, trades: [210, 920], profit: [2.1, 7.5] },
-    month: { labelKey: "lb.month", count: 10, trades: [780, 2800], profit: [7.5, 22] }
-};
-
-const leaderboardCache = {};
-
-function createSeededRandom(seed) {
-    let state = seed >>> 0;
-    return () => {
-        state = (state * 1664525 + 1013904223) >>> 0;
-        return state / 0x100000000;
-    };
-}
-
-function getLeaderboardSeed(period) {
-    const now = new Date();
-    const year = now.getFullYear();
-    const month = now.getMonth() + 1;
-    const day = now.getDate();
-    const periodSeed = { today: 11, week: 29, month: 47 }[period] || 0;
-
-    if (period === "today") return year * 10000 + month * 100 + day + periodSeed;
-    if (period === "week") {
-        const week = Math.floor(
-            (Date.UTC(year, now.getMonth(), day) - Date.UTC(year, 0, 1)) / (7 * 24 * 60 * 60 * 1000)
-        );
-        return year * 100 + week + periodSeed;
-    }
-    return year * 100 + month + periodSeed;
-}
-
-function randomInRange(rand, min, max) {
-    return min + rand() * (max - min);
-}
-
-function generateLeaderboard(period) {
-    const config = LEADERBOARD_PERIODS[period] || LEADERBOARD_PERIODS.today;
-    const rand = createSeededRandom(getLeaderboardSeed(period));
-    const traders = [];
-    const usedIds = new Set();
-
-    for (let i = 0; i < config.count; i++) {
-        let id = "";
-        do {
-            id = "..." + String(Math.floor(rand() * 10000)).padStart(4, "0");
-        } while (usedIds.has(id));
-        usedIds.add(id);
-
-        traders.push({
-            id,
-            trades: Math.round(randomInRange(rand, config.trades[0], config.trades[1])),
-            profit: randomInRange(rand, config.profit[0], config.profit[1])
-        });
-    }
-
-    traders.sort((a, b) => b.profit - a.profit);
-    return traders;
-}
-
-function getLeaderboard(period) {
-    const key = period + "_" + getLeaderboardSeed(period);
-    if (!leaderboardCache[key]) leaderboardCache[key] = generateLeaderboard(period);
-    return leaderboardCache[key];
-}
-
-let currentMethod = null;
-let selectedAsset = "forex";
-const pairMarketKind = { forex: "standard", crypto: "standard" };
-let selectedPair = "EUR/USD";
-let selectedTimeframe = "1m";
-let screenshotTimeframe = "1m";
-let currentSignal = null;
-let screenshotFile = null;
-let screenshotInitialized = false;
-const pairCooldownUntil = Object.create(null);
-let pairCooldownTimer = null;
-
-const $ = (sel) => document.querySelector(sel);
-const $$ = (sel) => document.querySelectorAll(sel);
-
-function getCooldownMsForTimeframe(tf) {
-    return TIMEFRAME_COOLDOWN_MS[tf] ?? 60 * 1000;
-}
-
-function getPairMarketKind(asset = selectedAsset) {
-    return pairMarketKind[asset] || "standard";
-}
-
-function setPairMarketKind(kind, asset = selectedAsset) {
-    if (PAIR_MARKET_TOGGLE_ASSETS.includes(asset)) {
-        pairMarketKind[asset] = kind;
-    }
-}
-
-function getPairsForAsset(asset) {
-    if (asset === "crypto") {
-        return getPairMarketKind("crypto") === "otc" ? cryptoOtcPairs : cryptoPairs;
-    }
-    if (asset === "stocks") return stocksList;
-    return getPairMarketKind("forex") === "otc" ? forexOtcPairs : forexPairs;
-}
-
-function syncSelectedPairWithCurrentList() {
-    const pairs = getPairsForAsset(selectedAsset);
-    if (!pairs.length) return;
-    if (!pairs.some((p) => p.symbol === selectedPair)) {
-        selectedPair = pairs[0].symbol;
-    }
-}
-
-function updateMarketToggleUI() {
-    const wrap = $("#marketKindToggle");
-    if (!wrap) return;
-    const show = PAIR_MARKET_TOGGLE_ASSETS.includes(selectedAsset);
-    wrap.hidden = !show;
-    if (!show) return;
-    const kind = getPairMarketKind();
-    wrap.querySelectorAll("[data-market-kind]").forEach((btn) => {
-        const on = btn.dataset.marketKind === kind;
-        btn.classList.toggle("active", on);
-        btn.setAttribute("aria-pressed", on ? "true" : "false");
+function clearDirectionBorderClasses() {
+    const mainCard = document.getElementById('mainCard');
+    const pairRow = document.querySelector('.signal-pair');
+    const chipTf = document.getElementById('chipTf');
+    const chipAcc = document.getElementById('chipAcc');
+    const dirBlock = document.getElementById('dirBlock');
+    const progressTrack = document.getElementById('progressTrack');
+    [pairRow, chipTf, chipAcc, dirBlock, progressTrack, mainCard].forEach((el) => {
+        if (el) el.classList.remove('dir-up', 'dir-down');
     });
 }
 
-function getAssetLabel() {
-    const key = ASSET_META[selectedAsset]?.labelKey || "asset.forex.title";
-    return t(key);
-}
+function syncDirectionStyles() {
+    const dirBlock = document.getElementById('dirBlock');
+    const pairRow = document.querySelector('.signal-pair');
+    const chipTf = document.getElementById('chipTf');
+    const chipAcc = document.getElementById('chipAcc');
+    const progressTrack = document.getElementById('progressTrack');
+    const mainCard = document.getElementById('mainCard');
+    if (!metaDir) return;
 
-function isFlowScreen(screenId) {
-    return FLOW_SCREENS.includes(screenId);
-}
+    const isUp = metaDir.classList.contains('up');
+    const isDown = metaDir.classList.contains('down');
+    const showBorder = isSignalActive && (isUp || isDown);
 
-function showLoading(text) {
-    const overlay = $("#loadingOverlay");
-    const label = $("#loadingText");
-    if (label) label.textContent = text || t("loading.market");
-    if (overlay) {
-        overlay.classList.add("show");
-        overlay.setAttribute("aria-hidden", "false");
-    }
-}
-
-function hideLoading() {
-    const overlay = $("#loadingOverlay");
-    if (overlay) {
-        overlay.classList.remove("show");
-        overlay.setAttribute("aria-hidden", "true");
-    }
-}
-
-function delay(ms) {
-    return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
-function getPairCooldownRemaining(pair = selectedPair) {
-    const until = pairCooldownUntil[pair];
-    if (!until) return 0;
-    return Math.max(0, until - Date.now());
-}
-
-function isPairOnCooldown(pair = selectedPair) {
-    return getPairCooldownRemaining(pair) > 0;
-}
-
-function markPairSignalUsed(pair = selectedPair, timeframe = selectedTimeframe) {
-    const ms = getCooldownMsForTimeframe(timeframe);
-    pairCooldownUntil[pair] = Date.now() + ms;
-    updateSignalCooldownUI();
-    ensurePairCooldownTimer();
-}
-
-function hasAnyPairCooldown() {
-    return Object.keys(pairCooldownUntil).some((key) => {
-        const until = pairCooldownUntil[key];
-        return until && until > Date.now();
-    });
-}
-
-function formatCooldownSeconds(totalSec) {
-    const sec = Math.max(0, Math.ceil(totalSec));
-    const m = Math.floor(sec / 60);
-    const s = sec % 60;
-    return m > 0 ? m + ":" + String(s).padStart(2, "0") : sec + "s";
-}
-
-function ensurePairCooldownTimer() {
-    if (pairCooldownTimer || !hasAnyPairCooldown()) return;
-    pairCooldownTimer = setInterval(() => {
-        Object.keys(pairCooldownUntil).forEach((k) => {
-            if (pairCooldownUntil[k] <= Date.now()) delete pairCooldownUntil[k];
-        });
-        const active = document.querySelector(".step-container.active");
-        if (active?.id === "pairsScreen") renderPairsList();
-        else updateSignalCooldownUI();
-        if (!hasAnyPairCooldown()) {
-            clearInterval(pairCooldownTimer);
-            pairCooldownTimer = null;
-        }
-    }, 500);
-}
-
-function updateSignalCooldownUI() {
-    const remaining = getPairCooldownRemaining();
-    const waitText = t("signal.wait", { time: formatCooldownSeconds(remaining / 1000) });
-    const onCooldown = remaining > 0;
-
-    const genBtn = $("#generateSignalBtn");
-    if (genBtn) {
-        genBtn.disabled = onCooldown;
-        genBtn.classList.toggle("is-cooldown", onCooldown);
-        genBtn.textContent = onCooldown ? waitText : t("signal.generate");
+    if (dirBlock) {
+        dirBlock.classList.toggle('is-up', isUp);
+        dirBlock.classList.toggle('is-down', isDown);
     }
 
-    const newBtn = $("#newSignalBtn");
-    if (newBtn) {
-        newBtn.disabled = onCooldown;
-        newBtn.classList.toggle("is-cooldown", onCooldown);
-        newBtn.innerHTML = onCooldown
-            ? '<i class="fas fa-clock"></i> ' + waitText
-            : '<i class="fas fa-rotate"></i> ' + t("signal.new");
-    }
-}
-
-const FLAG_IMG_DIR = "img/";
-const CRYPTO_FLAG_IMG_DIR = "img/crypto/";
-
-const CRYPTO_FLAG_FILES = {
-    BTC: "btc",
-    ETH: "eth",
-    SOL: "sol",
-    XRP: "xrp",
-    BNB: "bnb",
-    LTC: "ltc",
-    BCH: "bch",
-    ADA: "ada",
-    DOT: "dot",
-    LINK: "link",
-    UNI: "uni",
-    AVAX: "avax",
-    MATIC: "matic",
-    DOGE: "doge",
-    TRX: "trx",
-    XLM: "xlm",
-    ATOM: "atom",
-    ETC: "etc",
-    FIL: "fil",
-    XMR: "xmr",
-    AAVE: "aave",
-    ALGO: "algo",
-    SAND: "sand",
-    MANA: "mana",
-    CRV: "crv",
-    MKR: "mkr",
-    GRT: "grt",
-    EOS: "eos",
-    ZEC: "zec",
-    NEAR: "generic",
-    APT: "generic",
-    ARB: "generic",
-    OP: "generic",
-    INJ: "generic",
-    SUI: "generic",
-    TON: "generic",
-    SHIB: "generic",
-    FTM: "generic",
-    PEPE: "generic",
-    WIF: "generic",
-    BONK: "generic",
-    AXS: "generic"
-};
-
-const CURRENCY_FLAG_CODES = {
-    USD: "us",
-    EUR: "eu",
-    GBP: "gb",
-    JPY: "jp",
-    AUD: "au",
-    CAD: "ca",
-    NZD: "nz",
-    CHF: "ch",
-    SEK: "se",
-    NOK: "no",
-    DKK: "dk",
-    PLN: "pl",
-    CZK: "cz",
-    HUF: "hu",
-    TRY: "tr",
-    ZAR: "za",
-    MXN: "mx",
-    SGD: "sg",
-    THB: "th",
-    HKD: "hk",
-    INR: "in",
-    KRW: "kr",
-    CNH: "cn",
-    CNY: "cn",
-    BRL: "br",
-    CLP: "cl",
-    COP: "co",
-    ARS: "ar",
-    ILS: "il",
-    RUB: "ru",
-    IDR: "id",
-    MYR: "my",
-    PHP: "ph",
-    VND: "vn"
-};
-
-function normalizePairSymbol(symbol) {
-    return symbol.replace(/\s*\(OTC\)\s*$/i, "").trim();
-}
-
-function getCurrencyFlagCode(currency) {
-    return CURRENCY_FLAG_CODES[String(currency || "").toUpperCase()] || null;
-}
-
-function getCryptoFlagFile(currency) {
-    const key = String(currency || "").toUpperCase();
-    if (CRYPTO_FLAG_FILES[key]) return CRYPTO_FLAG_FILES[key];
-    return key.toLowerCase();
-}
-
-function resolvePairFlag(currency) {
-    const fiat = getCurrencyFlagCode(currency);
-    if (fiat) return { dir: FLAG_IMG_DIR, file: fiat };
-    return { dir: CRYPTO_FLAG_IMG_DIR, file: getCryptoFlagFile(currency) };
-}
-
-function getPairMark(symbol) {
-    const clean = normalizePairSymbol(symbol);
-    const parts = clean.split("/");
-    if (parts.length === 2) {
-        return (parts[0].slice(0, 1) + parts[1].slice(0, 1)).toUpperCase();
-    }
-    return clean.slice(0, 2).toUpperCase();
-}
-
-function createPairFlagImg(currency) {
-    const label = String(currency || "");
-    const { dir, file } = resolvePairFlag(label);
-    const img = document.createElement("img");
-    img.className = "pair-card__flag" + (dir === CRYPTO_FLAG_IMG_DIR ? " pair-card__flag--crypto" : "");
-    img.src = dir + file + ".svg";
-    img.alt = label;
-    img.loading = "lazy";
-    img.decoding = "async";
-
-    img.addEventListener("error", () => {
-        if (dir === CRYPTO_FLAG_IMG_DIR && file !== "generic") {
-            img.src = CRYPTO_FLAG_IMG_DIR + "generic.svg";
-            img.classList.add("pair-card__flag--crypto");
-            return;
-        }
-        img.replaceWith(createPairMarkFallback(label));
-    });
-
-    return img;
-}
-
-function hasPairFlagIcon(currency) {
-    const key = String(currency || "").toUpperCase();
-    if (getCurrencyFlagCode(key)) return true;
-    if (CRYPTO_FLAG_FILES[key]) return true;
-    return /^[A-Z0-9]{2,12}$/.test(key) && key !== "XAU" && key !== "XAG";
-}
-
-function createPairMarkFallback(label) {
-    const el = document.createElement("span");
-    el.className = "pair-card__mark-fallback";
-    el.textContent = String(label || "??").slice(0, 2).toUpperCase();
-    el.setAttribute("aria-hidden", "true");
-    return el;
-}
-
-function fillPairMark(markEl, symbol) {
-    markEl.textContent = "";
-    markEl.classList.remove("pair-card__mark--flags", "pair-card__mark--text");
-
-    const clean = normalizePairSymbol(symbol);
-    const slash = clean.indexOf("/");
-
-    if (slash === -1) {
-        markEl.classList.add("pair-card__mark--text");
-        markEl.textContent = getPairMark(symbol);
-        return;
-    }
-
-    const base = clean.slice(0, slash);
-    const quote = clean.slice(slash + 1);
-    const baseHasIcon = hasPairFlagIcon(base);
-    const quoteHasIcon = hasPairFlagIcon(quote);
-
-    if (!baseHasIcon && !quoteHasIcon) {
-        markEl.classList.add("pair-card__mark--text");
-        markEl.textContent = getPairMark(symbol);
-        return;
-    }
-
-    markEl.classList.add("pair-card__mark--flags");
-    markEl.appendChild(baseHasIcon ? createPairFlagImg(base) : createPairMarkFallback(base));
-    markEl.appendChild(quoteHasIcon ? createPairFlagImg(quote) : createPairMarkFallback(quote));
-}
-
-function updatePairsScreenHeader() {
-    const meta = ASSET_META[selectedAsset];
-    const titleEl = $("#pairsScreenTitle");
-    const subEl = $("#pairsScreenSubtitle");
-    const countEl = $("#pairsCount");
-    const pairs = getPairsForAsset(selectedAsset);
-    if (titleEl) titleEl.textContent = t(meta.titleKey);
-    if (subEl) {
-        if (selectedAsset === "forex") {
-            subEl.textContent =
-                getPairMarketKind("forex") === "otc" ? t("pairs.forex.subOtc") : t("pairs.forex.subStd");
-        } else if (selectedAsset === "crypto") {
-            subEl.textContent =
-                getPairMarketKind("crypto") === "otc" ? t("pairs.crypto.subOtc") : t("pairs.crypto.subStd");
-        } else {
-            subEl.textContent = t(meta.subKey);
-        }
-    }
-    if (countEl) countEl.textContent = t("pairs.available", { n: pairs.length });
-}
-
-function updateAssetCards() {
-    $$(".asset-card").forEach((card) => {
-        card.classList.toggle("selected", card.dataset.asset === selectedAsset);
-    });
-}
-
-function setBottomNavVisible(visible) {
-    const nav = $("#bottomNav");
-    if (nav) nav.classList.toggle("hidden", !visible);
-}
-
-function showScreen(screenId) {
-    $$(".step-container").forEach((el) => el.classList.remove("active"));
-    const screen = document.getElementById(screenId);
-    if (screen) screen.classList.add("active");
-
-    setBottomNavVisible(true);
-    updateBottomNav(screenId);
-
-    window.scrollTo({ top: 0, behavior: "smooth" });
-}
-
-function updateBottomNav(screenId) {
-    const navMap = {
-        homeScreen: "signals",
-        educationScreen: "education",
-        leadersScreen: "leaders",
-        faqScreen: "faq",
-        screenshotScreen: "signals"
-    };
-    const activeNav = navMap[screenId] || "signals";
-    $$(".nav-item").forEach((item) => {
-        item.classList.toggle("active", item.dataset.nav === activeNav);
-    });
-}
-
-function showHome() {
-    currentMethod = null;
-    showScreen("homeScreen");
-}
-
-function showAssetScreen() {
-    updateAssetCards();
-    showScreen("assetScreen");
-}
-
-function showPairsScreen() {
-    updateMarketToggleUI();
-    syncSelectedPairWithCurrentList();
-    updatePairsScreenHeader();
-    renderPairsList();
-    showScreen("pairsScreen");
-}
-
-function showTimeframeScreen() {
-    renderTimeframes();
-    updateSignalCooldownUI();
-    ensurePairCooldownTimer();
-    showScreen("timeframeScreen");
-}
-
-const FLOW_BACK_ROUTES = {
-    home: showHome,
-    asset: showAssetScreen,
-    pairs: showPairsScreen,
-    timeframe: showTimeframeScreen
-};
-
-function handleFlowBack(target) {
-    const navigate = FLOW_BACK_ROUTES[target];
-    if (navigate) navigate();
-}
-
-async function showSignalScreen() {
-    if (isPairOnCooldown()) {
-        updateSignalCooldownUI();
-        ensurePairCooldownTimer();
-        return;
-    }
-
-    showLoading(t("loading.generating"));
-    await delay(900);
-    currentSignal = generateRandomSignal();
-    markPairSignalUsed(selectedPair, selectedTimeframe);
-    renderSignal();
-    hideLoading();
-    showScreen("signalScreen");
-    updateSignalCooldownUI();
-}
-
-function showScreenshotScreen() {
-    showScreen("screenshotScreen");
-    const hasResult = Boolean($("#screenshotResult")?.innerHTML.trim());
-    renderScreenshotTimeframes();
-    setScreenshotHubVisible(!screenshotFile && !hasResult);
-    setScreenshotUploadVisible(!hasResult);
-    setScreenshotBackVisible(!hasResult);
-    setScreenshotTimeframeVisible(Boolean(screenshotFile) && !hasResult);
-    if (!screenshotInitialized) setupScreenshot();
-}
-
-function showEducationScreen() {
-    renderEducation("all");
-    showScreen("educationScreen");
-}
-
-function showLeadersScreen() {
-    renderLeaderboard("today");
-    showScreen("leadersScreen");
-}
-
-function showFaqScreen() {
-    renderFaq();
-    showScreen("faqScreen");
-}
-
-function createPairElement(pair) {
-    const item = document.createElement("article");
-    item.className = "pair-card" + (pair.symbol === selectedPair ? " is-selected" : "");
-    item.dataset.symbol = pair.symbol;
-
-    const mark = document.createElement("span");
-    mark.className = "pair-card__mark";
-    fillPairMark(mark, pair.symbol);
-
-    const body = document.createElement("span");
-    body.className = "pair-card__body";
-
-    const row = document.createElement("span");
-    row.className = "pair-card__row";
-
-    const sym = document.createElement("span");
-    sym.className = "pair-card__symbol";
-    sym.textContent = pair.symbol;
-
-    row.appendChild(sym);
-
-    if (pair.hot) {
-        const badge = document.createElement("span");
-        badge.className = "pair-card__hot";
-        badge.textContent = t("pairs.hot");
-        row.appendChild(badge);
-    }
-
-    const name = document.createElement("span");
-    name.className = "pair-card__name";
-    name.textContent = pair.name;
-
-    body.appendChild(row);
-    body.appendChild(name);
-
-    const check = document.createElement("span");
-    check.className = "pair-card__check";
-    check.innerHTML = '<i class="fas fa-check"></i>';
-
-    item.appendChild(mark);
-    item.appendChild(body);
-    item.appendChild(check);
-
-    item.addEventListener("click", () => {
-        selectedPair = pair.symbol;
-        $$(".pair-card").forEach((card) => {
-            card.classList.toggle("is-selected", card.dataset.symbol === selectedPair);
-        });
-        showTimeframeScreen();
-    });
-
-    return item;
-}
-
-function renderPairsList() {
-    const container = $("#pairsList");
-    if (!container) return;
-
-    const pairs = getPairsForAsset(selectedAsset);
-    const searchValue = ($("#searchPairsInput")?.value || "").toLowerCase();
-    const filtered = pairs.filter(
-        (p) =>
-            p.symbol.toLowerCase().includes(searchValue) ||
-            p.name.toLowerCase().includes(searchValue)
+    const hasResultGlow = mainCard && (
+        mainCard.classList.contains('win-glow')
+        || mainCard.classList.contains('lose-glow')
+        || mainCard.classList.contains('neutral-glow')
     );
 
-    container.innerHTML = "";
+    const applyDir = (el) => {
+        if (!el) return;
+        el.classList.toggle('dir-up', showBorder && isUp && !hasResultGlow);
+        el.classList.toggle('dir-down', showBorder && isDown && !hasResultGlow);
+    };
 
-    if (!filtered.length) {
-        const empty = document.createElement("div");
-        empty.className = "empty-state";
-        empty.innerHTML = '<i class="fas fa-search"></i><p>' + t("pairs.none") + "</p>";
-        container.appendChild(empty);
-        return;
+    applyDir(pairRow);
+    applyDir(chipTf);
+    applyDir(chipAcc);
+    applyDir(dirBlock);
+    applyDir(progressTrack);
+
+    if (mainCard && !hasResultGlow) {
+        mainCard.classList.toggle('dir-up', showBorder && isUp);
+        mainCard.classList.toggle('dir-down', showBorder && isDown);
+    } else if (mainCard) {
+        mainCard.classList.remove('dir-up', 'dir-down');
     }
-
-    const countEl = $("#pairsCount");
-    if (countEl) {
-        countEl.textContent =
-            filtered.length === pairs.length
-                ? t("pairs.available", { n: filtered.length })
-                : filtered.length + " / " + pairs.length;
-    }
-
-    filtered.forEach((pair) => container.appendChild(createPairElement(pair)));
-    if (hasAnyPairCooldown()) ensurePairCooldownTimer();
 }
 
-function updateTimeframeScreenSub() {
-    const el = $("#timeframeScreenSub");
-    if (el) el.textContent = t("tf.sub", { pair: selectedPair });
+function syncDirChip() {
+    syncDirectionStyles();
 }
 
-const TIMEFRAME_GROUPS = [
-    { labelKey: "tf.seconds", items: ["5s", "10s", "15s", "30s"] },
-    { labelKey: "tf.minutes", items: ["1m", "3m", "5m", "15m"] }
-];
-
-function createTimeframeChip(tf, selected, onSelect) {
-    const el = document.createElement("button");
-    el.type = "button";
-    el.className = "tf-chip" + (selected === tf ? " is-selected" : "");
-    el.dataset.tf = tf;
-    el.textContent = tf;
-    el.addEventListener("click", () => onSelect(tf));
-    return el;
-}
-
-function renderTimeframePanel(container, selected, onSelect) {
-    if (!container) return;
-    container.innerHTML = "";
-
-    TIMEFRAME_GROUPS.forEach((group) => {
-        const section = document.createElement("section");
-        section.className = "tf-group";
-
-        const label = document.createElement("p");
-        label.className = "tf-group__label";
-        label.textContent = t(group.labelKey);
-
-        const grid = document.createElement("div");
-        grid.className = "tf-grid";
-        group.items.forEach((tf) => grid.appendChild(createTimeframeChip(tf, selected, onSelect)));
-
-        section.appendChild(label);
-        section.appendChild(grid);
-        container.appendChild(section);
-    });
-}
-
-function renderTimeframes() {
-    const container = $("#timeframeSelector");
-    if (!container) return;
-
-    updateTimeframeScreenSub();
-    renderTimeframePanel(container, selectedTimeframe, (tf) => {
-        selectedTimeframe = tf;
-        renderTimeframes();
-        updateSignalCooldownUI();
-    });
-}
-
-function renderScreenshotTimeframes() {
-    renderTimeframePanel($("#screenshotTimeframeSelector"), screenshotTimeframe, (tf) => {
-        screenshotTimeframe = tf;
-        renderScreenshotTimeframes();
-    });
-}
-
-const SIGNAL_INDICATOR_KEYS = ["rsi", "macd", "ema", "bb", "stoch", "volume", "atr", "adx"];
-
-function pickRandomItems(arr, count) {
-    const copy = arr.slice();
-    for (let i = copy.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [copy[i], copy[j]] = [copy[j], copy[i]];
-    }
-    return copy.slice(0, count);
-}
-
-function generateRandomSignal() {
-    const direction = Math.random() > 0.5 ? "up" : "down";
-    const patterns = getSignalPatterns();
-    const reasons = getSignalReasons();
-    const upTrends = ["bullish", "strongBull", "moderateBull"];
-    const downTrends = ["bearish", "strongBear", "moderateBear"];
-    const upMomentum = ["high", "building", "steady"];
-    const downMomentum = ["fading", "weak", "steady"];
-    const indicatorCount = 3;
-
-    return {
-        direction,
-        pattern: patterns[Math.floor(Math.random() * patterns.length)],
-        reason: reasons[Math.floor(Math.random() * reasons.length)],
-        confidence: Math.floor(Math.random() * 20) + 70,
-        trendKey: pickRandomItems(direction === "up" ? upTrends : downTrends, 1)[0],
-        momentumKey: pickRandomItems(direction === "up" ? upMomentum : downMomentum, 1)[0],
-        indicatorKeys: pickRandomItems(SIGNAL_INDICATOR_KEYS, indicatorCount)
+function updateLangBtnFlag(lang) {
+    const img = document.getElementById("currentLangFlag");
+    if (!img) return;
+    const file = LANG_FLAG_FILES[lang] || "gb";
+    img.src = flagImgUrl(file);
+    img.alt = lang;
+    img.onerror = () => {
+        img.onerror = null;
+        img.src = `${FLAGS_CDN}/${file}.svg`;
     };
 }
 
-function getSignalIndicatorsChipsHtml(keys) {
-    return keys
-        .map((key) => '<span class="scan-result__chip">' + t("signal.ind." + key) + "</span>")
-        .join("");
+const translations = {
+    ru: {
+        select_language: "Выберите язык",
+        lang_btn: "Выбрать язык",
+        signal_label: "СИГНАЛ",
+        pair_label: "Валютная пара",
+        select_pair: "Выберите пару",
+        pair_search_placeholder: "Поиск пары...",
+        pair_badge_otc: "OTC",
+        pair_badge_forex: "Forex",
+        tf_label: "Таймфрейм",
+        accuracy_label: "Точность",
+        direction_label: "Направление",
+        until_label: "до",
+        waiting_status: "Ожидание...",
+        get_signal_btn: "ПОЛУЧИТЬ СИГНАЛ",
+        live_chart: "ЖИВОЙ ГРАФИК",
+        searching_signal: "ПОИСК СИГНАЛА...",
+        nav_home: "ГЛАВНАЯ",
+        nav_profile: "ПРОФИЛЬ",
+        signal_found: "Сигнал найден",
+        error: "Ошибка",
+        up: "Покупка",
+        down: "Продажа",
+        win: "WIN",
+        lose: "LOSE",
+        neutral: "NEUTRAL",
+        profile_page_title: "ПРОФИЛЬ",
+        total_signals: "Всего сигналов",
+        win_rate_label: "Win Rate",
+        stat_wins: "Побед",
+        history_title: "ИСТОРИЯ СДЕЛОК",
+        history_empty: "Нет сделок за этот период",
+        history_loading: "Загрузка…",
+        history_active: "Активна",
+        profile_guest: "Откройте приложение в Telegram, чтобы видеть профиль и историю",
+        filter_today: "Сегодня",
+        filter_week: "Неделя",
+        filter_month: "Месяц",
+        filter_all: "Все",
+        market_regular: "Обычный",
+        market_otc: "OTC",
+        chart_unavailable: "График недоступен",
+        chart_otc_desc: "График недоступен для OTC пар",
+        alert_title: "Сигнал недоступен",
+        alert_desc: "Вы не можете получить сигнал сейчас, так как предыдущий сигнал еще активен. Пожалуйста, дождитесь окончания таймфрейма.",
+        alert_cooldown_desc: "Новый сигнал будет доступен через",
+        cooldown_status: "Кулдаун",
+        cooldown_btn: "Подождите",
+        alert_btn_got_it: "Понятно"
+    },
+    en: {
+        select_language: "Select Language",
+        lang_btn: "Select Language",
+        signal_label: "SIGNAL",
+        pair_label: "Currency Pair",
+        select_pair: "Select pair",
+        pair_search_placeholder: "Search pair...",
+        pair_badge_otc: "OTC",
+        pair_badge_forex: "Forex",
+        tf_label: "Timeframe",
+        accuracy_label: "Accuracy",
+        direction_label: "Direction",
+        until_label: "until",
+        waiting_status: "Waiting...",
+        get_signal_btn: "GET SIGNAL",
+        live_chart: "LIVE CHART",
+        searching_signal: "SEARCHING SIGNAL...",
+        nav_home: "HOME",
+        nav_profile: "PROFILE",
+        signal_found: "Signal found",
+        error: "Error",
+        up: "Buy",
+        down: "Sell",
+        win: "WIN",
+        lose: "LOSE",
+        neutral: "NEUTRAL",
+        profile_page_title: "PROFILE",
+        total_signals: "Total Signals",
+        win_rate_label: "Win Rate",
+        stat_wins: "Wins",
+        history_title: "TRADING HISTORY",
+        history_empty: "No trades for this period",
+        history_loading: "Loading…",
+        history_active: "Active",
+        profile_guest: "Open the app in Telegram to see your profile and history",
+        filter_today: "Today",
+        filter_week: "Week",
+        filter_month: "Month",
+        filter_all: "All",
+        market_regular: "Regular",
+        market_otc: "OTC",
+        chart_unavailable: "Chart Unavailable",
+        chart_otc_desc: "Chart is not available for OTC pairs",
+        alert_title: "Signal Unavailable",
+        alert_desc: "You cannot get a new signal right now because the previous signal is still active. Please wait for the timeframe to end.",
+        alert_cooldown_desc: "Next signal available in",
+        cooldown_status: "Cooldown",
+        cooldown_btn: "Wait",
+        alert_btn_got_it: "Got it"
+    },
+    uz: {
+        select_language: "Tilni tanlang",
+        lang_btn: "Tilni tanlang",
+        signal_label: "SIGNAL",
+        pair_label: "Valyuta juftligi",
+        tf_label: "Taymfrey",
+        accuracy_label: "Aniqlik",
+        direction_label: "Yo'nalish",
+        until_label: "gacha",
+        waiting_status: "Kutilmoqda...",
+        get_signal_btn: "SIGNAL OLISH",
+        live_chart: "JONLI GRAFIK",
+        searching_signal: "SIGNAL QIDIRILMOQDA...",
+        nav_home: "ASOSIY",
+        nav_profile: "PROFIL",
+        signal_found: "Signal topildi",
+        error: "Xato",
+        up: "Sotib olish",
+        down: "Sotish",
+        win: "WIN",
+        lose: "LOSE",
+        neutral: "NEUTRAL",
+        profile_page_title: "PROFIL",
+        total_signals: "Jami signallar",
+        win_rate_label: "Win Rate",
+        history_title: "SAVDO TARIXI",
+        filter_today: "Bugun",
+        filter_week: "Hafta",
+        filter_month: "Oy",
+        filter_all: "Barchasi",
+        market_regular: "Odatiy",
+        market_otc: "OTC",
+        chart_unavailable: "Grafik mavjud emas",
+        chart_otc_desc: "OTC juftliklari uchun grafik mavjud emas",
+        alert_title: "Signal mavjud emas",
+        alert_desc: "Oldingi signal hali faol bo'lganligi sababli hozir yangi signal ololmaysiz. Iltimos, taymfrey tugashini kuting.",
+        alert_cooldown_desc: "Keyingi signal",
+        cooldown_status: "Kutish",
+        cooldown_btn: "Kuting",
+        alert_btn_got_it: "Tushunarli"
+    },
+    hi: {
+        select_language: "भाषा चुनें",
+        lang_btn: "भाषा चुनें",
+        signal_label: "संकेत",
+        pair_label: "मुद्रा जोड़ी",
+        tf_label: "समय सीमा",
+        accuracy_label: "सटीकता",
+        direction_label: "दिशा",
+        until_label: "तक",
+        waiting_status: "प्रतीक्षा...",
+        get_signal_btn: "संकेत प्राप्त करें",
+        live_chart: "लाइव चार्ट",
+        searching_signal: "संकेत खोज रहा है...",
+        nav_home: "घर",
+        nav_profile: "प्रोफ़ाइल",
+        signal_found: "संकेत मिला",
+        error: "त्रुटि",
+        up: "खरीदें",
+        down: "बेचें",
+        win: "जीत",
+        lose: "हार",
+        neutral: "तटस्थ"
+    },
+    pt: {
+        select_language: "Selecione o idioma",
+        lang_btn: "Selecione o idioma",
+        signal_label: "SINAL",
+        pair_label: "Par de moedas",
+        tf_label: "Prazo",
+        accuracy_label: "Precisão",
+        direction_label: "Direção",
+        until_label: "até",
+        waiting_status: "Aguardando...",
+        get_signal_btn: "OBTER SINAL",
+        live_chart: "GRÁFICO AO VIVO",
+        searching_signal: "BUSCANDO SINAL...",
+        nav_home: "INÍCIO",
+        nav_profile: "PERFIL",
+        signal_found: "Sinal encontrado",
+        error: "Erro",
+        up: "Compra",
+        down: "Venda",
+        win: "WIN",
+        lose: "LOSE",
+        neutral: "NEUTRAL"
+    },
+    ar: {
+        select_language: "اختر اللغة",
+        lang_btn: "اختر اللغة",
+        signal_label: "إشارة",
+        pair_label: "زوج العملات",
+        tf_label: "الإطار الزمني",
+        accuracy_label: "الدقة",
+        direction_label: "الاتجاه",
+        until_label: "حتى",
+        waiting_status: "انتظار...",
+        get_signal_btn: "احصل على إشارة",
+        live_chart: "رسم بياني مباشر",
+        searching_signal: "جاري البحث عن إشارة...",
+        nav_home: "الرئيسية",
+        nav_profile: "الملف الشخصي",
+        signal_found: "تم العثور على إشارة",
+        error: "خطأ",
+        up: "شراء",
+        down: "بيع",
+        win: "فوز",
+        lose: "خسارة",
+        neutral: "محايد"
+    },
+    kz: {
+        select_language: "Тілді таңдаңыз",
+        lang_btn: "Тілді таңдаңыз",
+        signal_label: "СИГНАЛ",
+        pair_label: "Валюта жұбы",
+        tf_label: "Таймфрейм",
+        accuracy_label: "Дәлдік",
+        direction_label: "Бағыт",
+        until_label: "дейін",
+        waiting_status: "Күту...",
+        get_signal_btn: "СИГНАЛ АЛУ",
+        live_chart: "ТІКЕЛЕЙ ГРАФИК",
+        searching_signal: "СИГНАЛ ІЗДЕУ...",
+        nav_home: "БАСТЫ",
+        nav_profile: "ПРОФИЛЬ",
+        signal_found: "Сигнал табылды",
+        error: "Қате",
+        up: "Сатып алу",
+        down: "Сату",
+        win: "WIN",
+        lose: "LOSE",
+        neutral: "NEUTRAL"
+    }
+};
+
+let currentLang = localStorage.getItem('trade_ai_lang') || 'en';
+let isOTC = false;
+let isSignalActive = false; // Lock flag
+let cooldownInterval = null;
+
+const COOLDOWNS_KEY = 'trade_ai_pair_cooldowns';
+const COOLDOWN_KEY_LEGACY = 'trade_ai_signal_cooldown';
+
+function tKey(key) {
+    return translations[currentLang][key] || translations.en[key] || key;
 }
 
-function getVerdictStepArrowHtml(isUp) {
-    const label = isUp ? t("signal.bullish") : t("signal.bearish");
-    const path = isUp
-        ? "M7 25 L23 9 M23 9 H13 M23 9 V17"
-        : "M7 7 L23 23 M23 23 H13 M23 23 V15";
-    return (
-        '<span class="scan-result__verdict" aria-label="' +
-        label +
-        '" title="' +
-        label +
-        '"><svg class="scan-result__arrow" viewBox="0 0 32 32" aria-hidden="true">' +
-        '<path class="scan-result__arrow-path" d="' +
-        path +
-        '"/></svg></span>'
-    );
+function normalizePairKey(pair) {
+    return String(pair || '').trim();
 }
 
-function buildScanResultHtml(signal, options = {}) {
-    const screenshot = Boolean(options.screenshot);
-    const timeframe = screenshot ? options.timeframe || screenshotTimeframe : selectedTimeframe;
-    const isUp = signal.direction === "up";
-    const mod = isUp ? "up" : "down";
-    const trendKey = signal.trendKey || (isUp ? "bullish" : "bearish");
-    const momentumKey = signal.momentumKey || "steady";
-    const indicatorKeys = signal.indicatorKeys || SIGNAL_INDICATOR_KEYS.slice(0, 3);
-    let factsHtml =
-        "<dt>" +
-        t("signal.timeframe") +
-        "</dt><dd>" +
-        timeframe +
-        "</dd>" +
-        "<dt>" +
-        t("signal.pattern") +
-        "</dt><dd>" +
-        signal.pattern +
-        "</dd>" +
-        "<dt>" +
-        t("signal.trend") +
-        '</dt><dd class="scan-result__trend scan-result__trend--' +
-        mod +
-        '">' +
-        t("signal.trend." + trendKey) +
-        "</dd>" +
-        "<dt>" +
-        t("signal.momentum") +
-        "</dt><dd>" +
-        t("signal.momentum." + momentumKey) +
-        "</dd>";
-
-    const indicatorsBlockHtml =
-        '<div class="scan-result__indicators-row">' +
-        '<span class="scan-result__indicators-label">' +
-        t("signal.indicators") +
-        "</span>" +
-        '<span class="scan-result__chips">' +
-        getSignalIndicatorsChipsHtml(indicatorKeys) +
-        "</span></div>";
-
-    const indicatorNames = indicatorKeys.map((key) => t("signal.ind." + key)).join(", ");
-    const detailHtml =
-        '<p class="scan-result__detail">' +
-        t("signal.detail", {
-            indicators: indicatorNames,
-            trend: t("signal.trend." + trendKey),
-            direction: isUp ? t("signal.up") : t("signal.down")
-        }) +
-        "</p>";
-
-    const pairLineHtml = screenshot
-        ? ""
-        : '<p class="scan-result__pair-line"><span class="scan-result__pair-label">' + t("signal.pair") + "</span> " +
-          selectedPair +
-          "</p>";
-
-
-    return (
-        '<article class="scan-result scan-result--' +
-        mod +
-        '">' +
-        '<header class="scan-result__banner">' +
-        getVerdictStepArrowHtml(isUp) +
-        '<p class="scan-result__signal-text">' + t("signal.yourIs") + ' <span class="scan-result__signal-dir">' +
-        (isUp ? t("signal.up") : t("signal.down")) +
-        "</span></p></header>" +
-        '<div class="scan-result__body">' +
-        pairLineHtml +
-        '<div class="scan-result__row">' +
-        '<span class="scan-result__label">' + t("signal.confidence") + "</span>" +
-        '<span class="scan-result__track" aria-hidden="true"><i style="width:' +
-        signal.confidence +
-        '%"></i></span>' +
-        '<span class="scan-result__value">' +
-        signal.confidence +
-        "%</span></div>" +
-        '<dl class="scan-result__facts">' +
-        factsHtml +
-        "</dl>" +
-        indicatorsBlockHtml +
-        '<p class="scan-result__insight">' +
-        signal.reason +
-        "</p>" +
-        detailHtml +
-        "</div></article>"
-    );
+function getCurrentPair() {
+    return pairSelect ? normalizePairKey(pairSelect.value) : '';
 }
 
-function buildSignalCardHtml(signal, options) {
-    return buildScanResultHtml(signal, options);
-}
-
-function renderSignal() {
-    if (!currentSignal) currentSignal = generateRandomSignal();
-    const el = $("#signalContent");
-    if (el) {
-        el.innerHTML = buildSignalCardHtml(currentSignal, { screenshot: false });
+function loadCooldownsMap() {
+    try {
+        const raw = localStorage.getItem(COOLDOWNS_KEY);
+        return raw ? JSON.parse(raw) : {};
+    } catch {
+        return {};
     }
 }
 
-async function newSignal() {
-    if (isPairOnCooldown()) {
-        updateSignalCooldownUI();
-        ensurePairCooldownTimer();
+function saveCooldownsMap(map) {
+    localStorage.setItem(COOLDOWNS_KEY, JSON.stringify(map));
+}
+
+function migrateLegacyCooldown() {
+    const legacy = localStorage.getItem(COOLDOWN_KEY_LEGACY);
+    if (!legacy) return;
+    localStorage.removeItem(COOLDOWN_KEY_LEGACY);
+    const until = parseInt(legacy, 10);
+    const pair = getCurrentPair();
+    if (until > Date.now() && pair) {
+        const map = loadCooldownsMap();
+        map[pair] = until;
+        saveCooldownsMap(map);
+    }
+}
+
+function getCooldownUntil(pair) {
+    const key = normalizePairKey(pair ?? getCurrentPair());
+    const map = loadCooldownsMap();
+    return parseInt(map[key] || '0', 10);
+}
+
+function getCooldownRemainingMs(pair) {
+    return Math.max(0, getCooldownUntil(pair) - Date.now());
+}
+
+function setSignalCooldownUntil(untilMs, pair) {
+    const key = normalizePairKey(pair ?? getCurrentPair());
+    if (!key) return;
+    const map = loadCooldownsMap();
+    map[key] = untilMs;
+    saveCooldownsMap(map);
+    startCooldownTicker();
+}
+
+function pruneExpiredCooldowns() {
+    const map = loadCooldownsMap();
+    const now = Date.now();
+    let changed = false;
+    for (const key of Object.keys(map)) {
+        if (map[key] <= now) {
+            delete map[key];
+            changed = true;
+        }
+    }
+    if (changed) saveCooldownsMap(map);
+}
+
+function clearSignalCooldown(pair) {
+    const key = normalizePairKey(pair ?? getCurrentPair());
+    const map = loadCooldownsMap();
+    if (map[key]) {
+        delete map[key];
+        saveCooldownsMap(map);
+    }
+    if (getCooldownRemainingMs() <= 0 && cooldownInterval) {
+        clearInterval(cooldownInterval);
+        cooldownInterval = null;
+    }
+    refreshSignalButton();
+}
+
+function formatCooldownButton(ms) {
+    return `${Math.max(0, Math.ceil(ms / 1000))}s`;
+}
+
+function formatCooldown(ms) {
+    return formatCooldownButton(ms);
+}
+
+function getSignalBtnLabel() {
+    const span = getSignalBtn?.querySelector('span');
+    return span;
+}
+
+function ensureCooldownTicker() {
+    const cd = getCooldownRemainingMs();
+    if (cd > 0 && !cooldownInterval) {
+        startCooldownTicker();
+    }
+}
+
+function refreshSignalButton() {
+    if (!getSignalBtn) return;
+    const span = getSignalBtnLabel();
+    const cd = getCooldownRemainingMs();
+
+    if (cd > 0) {
+        getSignalBtn.disabled = true;
+        const secs = formatCooldownButton(cd);
+        if (span) span.textContent = `${tKey('cooldown_btn')} ${secs}`;
+        if (statusText) {
+            statusText.textContent = isSignalActive
+                ? tKey('signal_found')
+                : `${tKey('cooldown_status')} ${secs}`;
+        }
+        ensureCooldownTicker();
         return;
     }
 
-    const newBtn = $("#newSignalBtn");
-    if (newBtn?.dataset.generating === "1") return;
-
-    if (newBtn) newBtn.dataset.generating = "1";
-
-    showLoading("Generating signal...");
-    await delay(900);
-    currentSignal = generateRandomSignal();
-    markPairSignalUsed(selectedPair, selectedTimeframe);
-    renderSignal();
-    hideLoading();
-
-    if (newBtn) delete newBtn.dataset.generating;
-
-    updateSignalCooldownUI();
-}
-
-function setScreenshotHubVisible(visible) {
-    const hub = $("#screenshotHub");
-    if (hub) hub.hidden = !visible;
-}
-
-function setScreenshotUploadVisible(visible) {
-    const panel = $("#screenshotUpload");
-    if (panel) panel.hidden = !visible;
-}
-
-function setScreenshotBackVisible(visible) {
-    const btn = $("#screenshotBackBtn");
-    if (btn) btn.hidden = !visible;
-}
-
-function setScreenshotTimeframeVisible(visible) {
-    const wrap = $("#screenshotTimeframeWrap");
-    if (wrap) wrap.hidden = !visible;
-}
-
-function getScreenshotResultActionsHtml() {
-    return (
-        '<div class="screenshot-result-actions">' +
-        '<button type="button" class="btn-secondary" data-screenshot-back>' +
-        '<i class="fas fa-arrow-left"></i> ' + t("btn.backSignals") + "</button>" +
-        '<button type="button" class="btn-secondary screenshot-result__reset" data-screenshot-reset>' + t("shot.new") + "</button>" +
-        "</div>"
-    );
-}
-
-function resetScreenshotUI() {
-    screenshotFile = null;
-    const uploadArea = $("#uploadArea");
-    const placeholder = $("#uploadPlaceholder");
-    const actions = $("#screenshotActions");
-    const result = $("#screenshotResult");
-    const fileInput = $("#fileInput");
-
-    if (uploadArea) {
-        uploadArea.classList.remove("has-image");
-        const img = uploadArea.querySelector("img");
-        if (img) img.remove();
+    if (cooldownInterval) {
+        clearInterval(cooldownInterval);
+        cooldownInterval = null;
     }
-    if (placeholder) placeholder.style.display = "";
-    if (actions) actions.hidden = true;
-    if (result) result.innerHTML = "";
-    if (fileInput) fileInput.value = "";
-    setScreenshotHubVisible(true);
-    setScreenshotUploadVisible(true);
-    setScreenshotBackVisible(true);
-    setScreenshotTimeframeVisible(false);
-}
 
-function showScreenshotPreview(file) {
-    if (!file || !file.type.startsWith("image/")) return;
-    if (file.size > 10 * 1024 * 1024) {
-        alert(t("shot.fileLarge"));
+    if (isSignalActive) {
+        getSignalBtn.disabled = true;
+        if (span) span.textContent = tKey('get_signal_btn');
         return;
     }
 
-    screenshotFile = file;
-    const reader = new FileReader();
-    reader.onload = (e) => {
-        const uploadArea = $("#uploadArea");
-        const placeholder = $("#uploadPlaceholder");
-        const actions = $("#screenshotActions");
-        if (!uploadArea) return;
-
-        let img = uploadArea.querySelector("img");
-        if (!img) {
-            img = document.createElement("img");
-            img.alt = "Chart preview";
-            uploadArea.appendChild(img);
-        }
-        img.src = e.target.result;
-        uploadArea.classList.add("has-image");
-        if (placeholder) placeholder.style.display = "none";
-        if (actions) actions.hidden = false;
-        $("#screenshotResult").innerHTML = "";
-        setScreenshotHubVisible(false);
-        setScreenshotUploadVisible(true);
-        setScreenshotTimeframeVisible(true);
-        renderScreenshotTimeframes();
-    };
-    reader.readAsDataURL(file);
+    getSignalBtn.disabled = false;
+    if (span) span.textContent = tKey('get_signal_btn');
+    if (statusText) statusText.textContent = tKey('waiting_status');
 }
 
-function setupScreenshot() {
-    screenshotInitialized = true;
-    const uploadArea = $("#uploadArea");
-    const fileInput = $("#fileInput");
-
-    uploadArea?.addEventListener("click", (e) => {
-        if (e.target.closest("#screenshotActions, #screenshotBackBtn, #screenshotTimeframeWrap")) return;
-        fileInput?.click();
-    });
-
-    fileInput?.addEventListener("change", (e) => {
-        const file = e.target.files[0];
-        if (file) showScreenshotPreview(file);
-    });
-
-    uploadArea?.addEventListener("dragover", (e) => {
-        e.preventDefault();
-        uploadArea.classList.add("dragover");
-    });
-
-    uploadArea?.addEventListener("dragleave", () => {
-        uploadArea.classList.remove("dragover");
-    });
-
-    uploadArea?.addEventListener("drop", (e) => {
-        e.preventDefault();
-        uploadArea.classList.remove("dragover");
-        const file = e.dataTransfer.files[0];
-        if (file) showScreenshotPreview(file);
-    });
-
-    $("#clearScreenshotBtn")?.addEventListener("click", (e) => {
-        e.stopPropagation();
-        resetScreenshotUI();
-    });
-
-    $("#analyzeScreenshotBtn")?.addEventListener("click", async (e) => {
-        e.stopPropagation();
-        if (!screenshotFile) return;
-        showLoading(t("loading.chart"));
-        await delay(1200);
-        const signal = generateRandomSignal();
-        const result = $("#screenshotResult");
-        if (result) {
-            result.innerHTML =
-                buildSignalCardHtml(signal, { screenshot: true, timeframe: screenshotTimeframe }) +
-                getScreenshotResultActionsHtml();
-            setScreenshotUploadVisible(false);
-            setScreenshotHubVisible(false);
-            setScreenshotBackVisible(false);
-        }
-        hideLoading();
-    });
-
-    $("#screenshotBackBtn")?.addEventListener("click", () => {
-        resetScreenshotUI();
-        showHome();
-    });
-
-    $("#screenshotResult")?.addEventListener("click", (e) => {
-        if (e.target.closest("[data-screenshot-back]")) {
-            resetScreenshotUI();
-            showHome();
-            return;
-        }
-        if (e.target.closest("[data-screenshot-reset]")) resetScreenshotUI();
-    });
-}
-
-function renderEducation(category) {
-    const catKey = category === "all" ? "all" : category;
-    const meta = {
-        label: t("edu.meta." + catKey + ".label"),
-        subtitle: t("edu.meta." + catKey + ".sub")
-    };
-    const allLessons = getEducationLessons();
-    const lessons = category === "all" ? allLessons : allLessons.filter((l) => l.cat === category);
-    const container = $("#educationList");
-    if (!container) return;
-
-    const head =
-        '<div class="education-head">' +
-        '<div><p class="education-head__label">' + t("edu.hub") + "</p>" +
-        '<p class="education-head__title">' + meta.label + "</p>" +
-        '<p class="education-head__subtitle">' + meta.subtitle + "</p></div>" +
-        '<div class="education-head__stat">' + lessons.length + " " + (lessons.length === 1 ? t("edu.lesson") : t("edu.lessons")) + "</div></div>";
-
-    const stack =
-        lessons.length === 0
-            ? '<p class="edu-empty">' + t("edu.empty") + "</p>"
-            : '<div class="edu-stack">' +
-              lessons
-                  .map((lesson, index) => {
-                      const num = String(index + 1).padStart(2, "0");
-                      const tag = t("edu.cat." + lesson.cat) || lesson.cat;
-                      return (
-                          '<article class="edu-lesson edu-lesson--' + lesson.cat + '">' +
-                          '<button type="button" class="edu-lesson__trigger" aria-expanded="false">' +
-                          '<span class="edu-lesson__icon"><i class="fas ' + lesson.icon + '"></i></span>' +
-                          '<span class="edu-lesson__body">' +
-                          '<span class="edu-lesson__meta">' +
-                          '<span class="edu-lesson__tag">' + tag + "</span>" +
-                          "</span>" +
-                          '<span class="edu-lesson__title">' + lesson.title + "</span>" +
-                          "</span>" +
-                          '<span class="edu-lesson__num">' + num + "</span>" +
-                          '<span class="edu-lesson__chevron" aria-hidden="true"><i class="fas fa-chevron-down"></i></span>' +
-                          "</button>" +
-                          '<div class="edu-lesson__content">' +
-                          '<div class="edu-lesson__content-inner"><p>' + lesson.desc + "</p></div>" +
-                          "</div></article>"
-                      );
-                  })
-                  .join("") +
-              "</div>";
-
-    container.innerHTML = head + stack;
-}
-
-function formatProfit(value) {
-    return "+$" + value.toFixed(2) + "k";
-}
-
-function renderLeaderboard(period) {
-    const config = LEADERBOARD_PERIODS[period] || LEADERBOARD_PERIODS.today;
-    const data = getLeaderboard(period);
-    const container = $("#leaderboardList");
-    if (!container) return;
-
-    const medals = ["\ud83e\udd47", "\ud83e\udd48", "\ud83e\udd49"];
-    const topProfit = data[0]?.profit || 0;
-
-    const head =
-        '<div class="leaderboard-head">' +
-        '<div><p class="leaderboard-head__label">' + t("lb.head") + "</p>" +
-        '<p class="leaderboard-head__period">' + t(config.labelKey) + "</p></div>" +
-        '<div class="leaderboard-head__badge">' + t("lb.active", { n: data.length }) + "</div></div>";
-
-    const podiumOrder = [1, 0, 2];
-    const podiumHtml = podiumOrder
-        .map((idx) => {
-            const trader = data[idx];
-            if (!trader) return "";
-            const place = idx + 1;
-            const extra = place === 1 ? " leader-podium__item--first" : "";
-            return (
-                '<article class="leader-podium__item' + extra + " leader-podium__item--p" + place + '">' +
-                '<span class="leader-podium__medal">' + medals[idx] + "</span>" +
-                '<span class="leader-podium__id">' + trader.id + "</span>" +
-                '<span class="leader-podium__profit">' + formatProfit(trader.profit) + "</span>" +
-                '<span class="leader-podium__trades">' + trader.trades + " " + t("lb.trades") + "</span>" +
-                "</article>"
-            );
-        })
-        .join("");
-
-    const podium = '<div class="leaderboard-podium">' + podiumHtml + "</div>";
-
-    const list =
-        '<div class="leaderboard-list">' +
-        data
-            .map((trader, idx) => {
-                const rank = idx + 1;
-                const isTop = idx < 3;
-                const rankLabel = isTop ? medals[idx] : String(rank);
-                const progress = topProfit > 0 ? Math.max(12, Math.round((trader.profit / topProfit) * 100)) : 0;
-                return (
-                    '<article class="leader-card' +
-                    (isTop ? " leader-card--top leader-card--rank-" + rank : "") +
-                    '">' +
-                    '<div class="leader-card__rank">' + rankLabel + "</div>" +
-                    '<div class="leader-card__main">' +
-                    '<div class="leader-card__row">' +
-                    '<span class="leader-card__id">' + trader.id + "</span>" +
-                    '<span class="leader-card__profit">' + formatProfit(trader.profit) + "</span>" +
-                    "</div>" +
-                    '<div class="leader-card__meta">' +
-                    "<span>" + trader.trades + " " + t("lb.trades") + "</span>" +
-                    '<span class="leader-card__bar"><i style="width:' + progress + '%"></i></span>' +
-                    "</div></div></article>"
-                );
-            })
-            .join("") +
-        "</div>";
-
-    container.innerHTML = head + podium + list;
-}
-
-function renderFaq() {
-    const container = $("#faqList");
-    if (!container) return;
-
-    container.innerHTML = getFaqContent()
-        .map((item, index) => {
-            const num = String(index + 1).padStart(2, "0");
-            return (
-                '<article class="faq-card">' +
-                '<button type="button" class="faq-card__trigger" aria-expanded="false">' +
-                '<span class="faq-card__num">' + num + "</span>" +
-                '<span class="faq-card__question">' + item.q + "</span>" +
-                '<span class="faq-card__toggle" aria-hidden="true">' +
-                '<i class="fas fa-plus faq-card__icon faq-card__icon--plus"></i>' +
-                '<i class="fas fa-xmark faq-card__icon faq-card__icon--close"></i>' +
-                "</span>" +
-                "</button>" +
-                '<div class="faq-card__answer"><div class="faq-card__answer-inner"><p>' +
-                item.a +
-                "</p></div></div>" +
-                "</article>"
-            );
-        })
-        .join("");
-}
-
-function bindEvents() {
-    $$(".method-card").forEach((card) => {
-        card.addEventListener("click", () => {
-            currentMethod = card.dataset.method;
-            if (currentMethod === "instrument") showAssetScreen();
-            else if (currentMethod === "screenshot") showScreenshotScreen();
-        });
-    });
-
-    $$(".asset-card").forEach((card) => {
-        card.addEventListener("click", () => {
-            selectedAsset = card.dataset.asset;
-            if (PAIR_MARKET_TOGGLE_ASSETS.includes(selectedAsset)) {
-                syncSelectedPairWithCurrentList();
-            } else {
-                selectedPair = ASSET_META[selectedAsset].defaultPair;
+function startCooldownTicker() {
+    if (cooldownInterval) clearInterval(cooldownInterval);
+    cooldownInterval = setInterval(() => {
+        refreshSignalButton();
+        pruneExpiredCooldowns();
+        if (getCooldownRemainingMs() <= 0) {
+            if (cooldownInterval) {
+                clearInterval(cooldownInterval);
+                cooldownInterval = null;
             }
-            updateAssetCards();
-        });
-    });
-
-    $("#marketKindToggle")?.addEventListener("click", (e) => {
-        const btn = e.target.closest("[data-market-kind]");
-        if (!btn || !PAIR_MARKET_TOGGLE_ASSETS.includes(selectedAsset)) return;
-        setPairMarketKind(btn.dataset.marketKind);
-        updateMarketToggleUI();
-        syncSelectedPairWithCurrentList();
-        updatePairsScreenHeader();
-        renderPairsList();
-    });
-
-    $("#assetContinueBtn")?.addEventListener("click", showPairsScreen);
-
-    $("#generateSignalBtn")?.addEventListener("click", () => {
-        showSignalScreen();
-    });
-
-    $("#newSignalBtn")?.addEventListener("click", newSignal);
-
-    document.addEventListener("click", (e) => {
-        const btn = e.target.closest("[data-flow-back]");
-        if (!btn) return;
-        handleFlowBack(btn.dataset.flowBack);
-    });
-
-    $("#searchPairsInput")?.addEventListener("input", renderPairsList);
-
-    $$("#eduCategory .edu-tab").forEach((tab) => {
-        tab.addEventListener("click", () => {
-            $$("#eduCategory .edu-tab").forEach((t) => t.classList.remove("active"));
-            tab.classList.add("active");
-            renderEducation(tab.dataset.cat);
-        });
-    });
-
-    $$("#lbTabs .lb-tab").forEach((tab) => {
-        tab.addEventListener("click", () => {
-            $$("#lbTabs .lb-tab").forEach((t) => t.classList.remove("active"));
-            tab.classList.add("active");
-            renderLeaderboard(tab.dataset.period);
-        });
-    });
-
-    $$(".nav-item").forEach((item) => {
-        item.addEventListener("click", () => {
-            const nav = item.dataset.nav;
-            if (nav === "signals") showHome();
-            else if (nav === "education") showEducationScreen();
-            else if (nav === "leaders") showLeadersScreen();
-            else if (nav === "faq") showFaqScreen();
-        });
-    });
-
-    $("#educationList")?.addEventListener("click", (e) => {
-        const trigger = e.target.closest(".edu-lesson__trigger");
-        if (!trigger) return;
-        const lesson = trigger.closest(".edu-lesson");
-        const list = $("#educationList");
-        if (!lesson || !list) return;
-        const willOpen = !lesson.classList.contains("is-open");
-        list.querySelectorAll(".edu-lesson").forEach((item) => {
-            item.classList.toggle("is-open", willOpen && item === lesson);
-            item.querySelector(".edu-lesson__trigger")?.setAttribute(
-                "aria-expanded",
-                willOpen && item === lesson ? "true" : "false"
-            );
-        });
-    });
-
-    $("#faqList")?.addEventListener("click", (e) => {
-        const trigger = e.target.closest(".faq-card__trigger");
-        if (!trigger) return;
-        const card = trigger.closest(".faq-card");
-        const list = $("#faqList");
-        if (!card || !list) return;
-        const willOpen = !card.classList.contains("is-open");
-        list.querySelectorAll(".faq-card").forEach((c) => {
-            c.classList.toggle("is-open", willOpen && c === card);
-            c.querySelector(".faq-card__trigger")?.setAttribute(
-                "aria-expanded",
-                willOpen && c === card ? "true" : "false"
-            );
-        });
-    });
-
-    $("#brandHomeBtn")?.addEventListener("click", showHome);
-
-    $("#closeBtn")?.addEventListener("click", () => {
-        if (window.Telegram?.WebApp) {
-            window.Telegram.WebApp.close();
-        } else if (confirm(t("close.confirm"))) {
-            showHome();
         }
+    }, 200);
+    refreshSignalButton();
+}
+
+function initCooldownFromStorage() {
+    migrateLegacyCooldown();
+    pruneExpiredCooldowns();
+    refreshSignalButton();
+}
+
+function onAppResume() {
+    pruneExpiredCooldowns();
+    refreshSignalButton();
+    ensureCooldownTicker();
+}
+
+const standardPairs = [
+    "EURUSD", "GBPUSD", "USDJPY", "USDCHF", "USDCAD", "AUDUSD", 
+    "GBPJPY", "EURJPY", "EURGBP", "EURCAD", "GBPCHF", "CADJPY", 
+    "AUDCAD", "AUDJPY", "EURCHF", "CADCHF"
+];
+
+const otcPairs = [
+    "EURUSD OTC", "CADJPY OTC", "GBPCHF OTC", "EURCAD OTC", "EURGBP OTC", 
+    "EURJPY OTC", "GBPJPY OTC", "AUDUSD OTC", "USDCAD OTC", "USDCHF OTC", 
+    "USDJPY OTC", "GBPUSD OTC", "AUDCAD OTC", "GBPCAD OTC", "AUDJPY OTC", 
+    "EURCHF OTC", "CADCHF OTC"
+];
+
+const standardTimeframes = ["1m", "3m", "5m", "15m"];
+const otcTimeframes = ["5s", "15s", "30s", "1m", "2m", "3m", "4m", "5m"];
+
+const pairSelect = document.getElementById("pair");
+const timeframeSelect = document.getElementById("timeframe");
+const getSignalBtn = document.getElementById("getSignalBtn");
+// const curSignal = document.getElementById("curSignal"); // Removed
+const chartFrame = document.getElementById("chartFrame");
+const userInfo = document.getElementById("userInfo");
+const userAvatar = document.getElementById("userAvatar");
+const statusText = document.getElementById("statusText");
+const metaPair = document.getElementById("metaPair");
+const metaTf = document.getElementById("metaTf");
+const metaTime = document.getElementById("metaTime");
+const metaAcc = document.getElementById("metaAcc");
+const metaDir = document.getElementById("metaDir");
+const metaUntil = document.getElementById("metaUntil");
+const spinner = document.getElementById("spinner");
+const pairFlags = document.getElementById("pairFlags");
+const pairFlagDisplay = document.getElementById("pairFlagDisplay");
+const pairTextDisplay = document.getElementById("pairTextDisplay");
+const tfTextDisplay = document.getElementById("tfTextDisplay");
+const cardPairFlags = document.getElementById("cardPairFlags");
+const spinnerOverlay = document.getElementById("spinnerOverlay");
+const resultStamp = document.getElementById("resultStamp");
+const dirIcon = document.getElementById("dirIcon");
+const dirIconUse = document.getElementById("dirIconUse");
+const dirCard = document.getElementById("dirCard");
+const progressBar = document.getElementById("progressBar");
+const progressLabel = document.getElementById("progressLabel");
+
+function setProgressPct(pct) {
+    const clamped = Math.max(0, Math.min(100, pct));
+    const ratio = (clamped / 100).toFixed(4);
+
+    if (progressBar) {
+        progressBar.style.setProperty("--progress", ratio);
+        progressBar.setAttribute("aria-valuenow", String(Math.floor(clamped)));
+    }
+    if (progressLabel) {
+        progressLabel.textContent = clamped >= 100 ? "100%" : `${Math.floor(clamped)}%`;
+    }
+}
+
+let progressResetTimer = null;
+
+function stopProgressReset() {
+    if (progressResetTimer) {
+        clearTimeout(progressResetTimer);
+        progressResetTimer = null;
+    }
+    if (progressBar) {
+        progressBar.classList.remove("is-resetting");
+    }
+}
+
+function resetProgressSmooth(callback) {
+    stopProgressReset();
+
+    if (!progressBar) {
+        setProgressPct(0);
+        if (callback) callback();
+        return;
+    }
+
+    const current = parseFloat(
+        progressBar.style.getPropertyValue("--progress") ||
+        getComputedStyle(progressBar).getPropertyValue("--progress")
+    ) || 0;
+
+    if (current <= 0.01) {
+        progressBar.classList.remove("is-filling", "is-resetting");
+        setProgressPct(0);
+        if (callback) callback();
+        return;
+    }
+
+    progressBar.classList.remove("is-filling");
+    progressBar.classList.add("is-resetting");
+    progressBar.style.setProperty("--progress", "0");
+    progressBar.setAttribute("aria-valuenow", "0");
+    if (progressLabel) progressLabel.textContent = "0%";
+
+    let finished = false;
+    const done = () => {
+        if (finished) return;
+        finished = true;
+        progressBar.classList.remove("is-resetting");
+        progressBar.removeEventListener("transitionend", onTransitionEnd);
+        if (progressResetTimer) {
+            clearTimeout(progressResetTimer);
+            progressResetTimer = null;
+        }
+        if (callback) callback();
+    };
+
+    const onTransitionEnd = (e) => {
+        if (e.target === progressBar && e.propertyName === "transform") done();
+    };
+
+    progressBar.addEventListener("transitionend", onTransitionEnd);
+    progressResetTimer = setTimeout(done, 900);
+}
+const resultLabel = document.getElementById("resultLabel");
+const resultIconUse = document.getElementById("resultIconUse");
+let progressTimer = null;
+const langBtn = document.getElementById("langBtn");
+const langModal = document.getElementById("langModal");
+const closeLangBtn = document.getElementById("closeLangBtn");
+const pairModal = document.getElementById("pairModal");
+const closePairBtn = document.getElementById("closePairBtn");
+const pairSearchInput = document.getElementById("pairSearchInput");
+const pairList = document.getElementById("pairList");
+const pairSelectTrigger = document.getElementById("pairSelectTrigger");
+const alertModal = document.getElementById("alertModal");
+const closeAlertBtn = document.getElementById("closeAlertBtn");
+const homeView = document.getElementById("homeView");
+const profileView = document.getElementById("profileView");
+const profileAvatar = document.getElementById("profileAvatar");
+let tgUser = null;
+let currentView = "home";
+let profileTabsInitialized = false;
+
+const btnRegular = document.getElementById("btnRegular");
+const btnOTC = document.getElementById("btnOTC");
+const chartPlaceholder = document.getElementById("chartPlaceholder");
+const marketToggleContainer = document.querySelector('.market-toggle-container');
+
+function isOtcPairValue(pairValue) {
+    return /\s+OTC$/i.test(String(pairValue));
+}
+
+function getPairBaseLabel(pairValue) {
+    const clean = String(pairValue).replace(/\s+OTC$/i, "").replace(/\s/g, "");
+    if (clean.length >= 6) return `${clean.slice(0, 3)}/${clean.slice(3, 6)}`;
+    return clean || String(pairValue);
+}
+
+function getPairDisplayLabel(pairValue) {
+    const base = getPairBaseLabel(pairValue);
+    return isOtcPairValue(pairValue) ? `${base} OTC` : base;
+}
+
+function getPairCodes(pairValue) {
+    const clean = String(pairValue).replace(/\s+OTC$/i, "").replace(/\s/g, "");
+    if (clean.length >= 6) return `${clean.slice(0, 3)} · ${clean.slice(3, 6)}`;
+    return "";
+}
+
+function getPairSearchKey(pairValue) {
+    const clean = String(pairValue).replace(/\s+OTC$/i, "").replace(/\s/g, "").toLowerCase();
+    const label = getPairDisplayLabel(pairValue).toLowerCase();
+    return `${pairValue} ${label} ${clean}`.toLowerCase();
+}
+
+function updatePairTriggerDisplay() {
+    if (!pairSelect) return;
+    if (pairTextDisplay) pairTextDisplay.textContent = getPairDisplayLabel(pairSelect.value);
+    if (pairFlagDisplay) pairFlagDisplay.innerHTML = flagsForPair(pairSelect.value);
+}
+
+function renderPairModalList() {
+    if (!pairList || !pairSelect) return;
+    pairList.innerHTML = "";
+
+    Array.from(pairSelect.options).forEach((opt) => {
+        const item = document.createElement("div");
+        item.className = "pair-item";
+        item.dataset.value = opt.value;
+        item.dataset.search = getPairSearchKey(opt.value);
+        const otc = isOtcPairValue(opt.value);
+        const codes = getPairCodes(opt.value);
+        item.innerHTML = `
+            <div class="pair-item__main">
+                ${flagsForPair(opt.value)}
+                <span class="pair-item__text">
+                    <span class="pair-item__label">${getPairBaseLabel(opt.value)}</span>
+                    ${codes ? `<span class="pair-item__codes">${codes}</span>` : ""}
+                </span>
+            </div>
+            <span class="pair-item__side">
+                <span class="pair-item__badge ${otc ? "pair-item__badge--otc" : "pair-item__badge--forex"}">${otc ? tKey("pair_badge_otc") : tKey("pair_badge_forex")}</span>
+            </span>
+        `;
+        if (opt.value === pairSelect.value) item.classList.add("selected");
+        item.addEventListener("click", () => selectPair(opt.value));
+        pairList.appendChild(item);
+    });
+
+    filterPairModalList(pairSearchInput?.value || "");
+}
+
+function filterPairModalList(query) {
+    if (!pairList) return;
+    const q = String(query).trim().toLowerCase();
+    pairList.querySelectorAll(".pair-item").forEach((item) => {
+        const hay = item.dataset.search || "";
+        item.classList.toggle("hidden", Boolean(q) && !hay.includes(q));
     });
 }
 
-function initTelegramWebApp() {
-    const tg = window.Telegram?.WebApp;
-    if (!tg) return;
+function selectPair(value) {
+    if (!pairSelect) return;
+    pairSelect.value = value;
+    updatePairTriggerDisplay();
+    pairList?.querySelectorAll(".pair-item").forEach((item) => {
+        item.classList.toggle("selected", item.dataset.value === value);
+    });
+    hidePairModal();
+    pairSelect.dispatchEvent(new Event("change"));
+}
 
-    tg.ready();
-    tg.expand();
+function showPairModal() {
+    if (!pairModal) return;
+    renderPairModalList();
+    pairModal.classList.remove("hidden");
+    document.body.style.overflow = "hidden";
+    if (pairSearchInput) {
+        pairSearchInput.value = "";
+        filterPairModalList("");
+        setTimeout(() => pairSearchInput.focus(), 50);
+    }
+}
 
-    if (typeof tg.requestFullscreen === "function") {
+function hidePairModal() {
+    if (!pairModal) return;
+    pairModal.classList.add("hidden");
+    document.body.style.overflow = "";
+    if (pairSearchInput) pairSearchInput.value = "";
+}
+
+function findEquivalentPair(pairValue, pairs) {
+    const clean = String(pairValue).replace(/\s+OTC$/i, "").replace(/\s/g, "");
+    if (!clean) return null;
+    if (isOTC) {
+        const otcVal = `${clean} OTC`;
+        return pairs.includes(otcVal) ? otcVal : null;
+    }
+    return pairs.includes(clean) ? clean : null;
+}
+
+function getExpectedSignalType() {
+    return isOTC ? "OTC" : "REGULAR";
+}
+
+function stopProgressTimer() {
+    if (progressTimer) {
+        clearInterval(progressTimer);
+        progressTimer = null;
+    }
+    stopProgressReset();
+}
+
+function reconcileSignalState() {
+    if (!pairSelect) return;
+
+    const currentPair = getCurrentPair();
+    const stored = localStorage.getItem(ACTIVE_SIGNAL_KEY);
+    let resumed = false;
+
+    if (stored) {
         try {
+            const state = JSON.parse(stored);
+            const elapsed = Date.now() - state.startTime;
+            const samePair = normalizePairKey(state.pair) === currentPair;
+            const sameMode = state.type === getExpectedSignalType();
+
+            if (samePair && sameMode && elapsed < state.duration) {
+                restoreActiveSignal({ fromPairSwitch: true });
+                resumed = true;
+            } else {
+                isSignalActive = false;
+                stopProgressTimer();
+                setProgressPct(0);
+                syncDirectionStyles();
+                if (elapsed >= state.duration) {
+                    clearSignalState();
+                }
+            }
+        } catch {
+            isSignalActive = false;
+            stopProgressTimer();
+            setProgressPct(0);
+            syncDirectionStyles();
+        }
+    } else {
+        isSignalActive = false;
+        stopProgressTimer();
+        setProgressPct(0);
+        syncDirectionStyles();
+    }
+
+    if (!resumed) {
+        refreshSignalButton();
+        ensureCooldownTicker();
+    }
+}
+
+function updatePairOptions() {
+    if (!pairSelect) return;
+    const pairs = isOTC ? otcPairs : standardPairs;
+    const currentVal = pairSelect.value;
+
+    pairSelect.innerHTML = "";
+    pairs.forEach((p) => {
+        const opt = document.createElement("option");
+        opt.value = p;
+        opt.textContent = getPairDisplayLabel(p);
+        pairSelect.appendChild(opt);
+    });
+
+    const equivalent = findEquivalentPair(currentVal, pairs);
+    if (equivalent) {
+        pairSelect.value = equivalent;
+    } else if (pairs.includes(currentVal)) {
+        pairSelect.value = currentVal;
+    } else {
+        pairSelect.selectedIndex = 0;
+    }
+
+    pairSelect.closest(".pair-picker, .custom-select")?.querySelector(".dropdown-list")?.remove();
+
+    updatePairTriggerDisplay();
+    renderPairModalList();
+    syncMarketUi();
+}
+
+function updateTimeframeOptions() {
+    if (!timeframeSelect) return;
+    const tfs = isOTC ? otcTimeframes : standardTimeframes;
+    
+    timeframeSelect.innerHTML = '';
+    tfs.forEach(tf => {
+        const opt = document.createElement('option');
+        opt.value = tf;
+        opt.text = tf;
+        timeframeSelect.appendChild(opt);
+    });
+    
+    timeframeSelect.selectedIndex = 0;
+    
+    // Update Custom Dropdown for Timeframe
+    const container = timeframeSelect.closest('.custom-select');
+    if (container) {
+        const list = container.querySelector('.dropdown-list');
+        if (list) {
+            list.innerHTML = '';
+            
+            Array.from(timeframeSelect.options).forEach(opt => {
+                const item = document.createElement('div');
+                item.className = 'dropdown-item';
+                item.textContent = opt.text;
+                item.dataset.value = opt.value;
+                if (opt.selected) item.classList.add('selected');
+
+                item.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    timeframeSelect.value = opt.value;
+                    timeframeSelect.dispatchEvent(new Event('change'));
+                    list.classList.remove('open');
+                    
+                    list.querySelectorAll('.dropdown-item').forEach(i => i.classList.remove('selected'));
+                    item.classList.add('selected');
+                });
+                list.appendChild(item);
+            });
+        }
+    }
+    syncMarketUi();
+    refreshSignalButton();
+}
+
+function setMarketMode(mode, options = {}) {
+    isOTC = (mode === 'OTC');
+    if (isOTC) {
+        btnRegular.classList.remove('active');
+        btnOTC.classList.add('active');
+        if (marketToggleContainer) marketToggleContainer.classList.add('otc-active');
+        if (chartFrame) chartFrame.classList.add('hidden');
+        if (chartPlaceholder) chartPlaceholder.classList.remove('hidden');
+    } else {
+        btnOTC.classList.remove('active');
+        btnRegular.classList.add('active');
+        if (marketToggleContainer) marketToggleContainer.classList.remove('otc-active');
+        if (chartFrame) chartFrame.classList.remove('hidden');
+        if (chartPlaceholder) chartPlaceholder.classList.add('hidden');
+    }
+    updatePairOptions();
+    updateTimeframeOptions();
+    if (!options.skipReconcile) {
+        reconcileSignalState();
+    }
+}
+
+if (btnRegular) btnRegular.addEventListener('click', () => setMarketMode('Regular'));
+if (btnOTC) btnOTC.addEventListener('click', () => setMarketMode('OTC'));
+
+function mapToTradingViewSymbol(pair) {
+    return `FX:${pair}`;
+}
+
+function mapTfToInterval(tf) {
+    if (tf === "1m") return "1";
+    if (tf === "3m") return "3";
+    if (tf === "5m") return "5";
+    if (tf === "15m") return "15";
+    return "1";
+}
+
+function clearSignalCardPreview() {
+    if (metaAcc) metaAcc.textContent = "--%";
+    if (metaDir) {
+        metaDir.textContent = "--";
+        metaDir.classList.remove('up', 'down');
+        syncDirChip();
+    }
+    if (metaUntil) metaUntil.textContent = "--:--";
+    if (statusText && !isSignalActive && getCooldownRemainingMs() <= 0) {
+        statusText.textContent = tKey('waiting_status');
+    }
+    setProgressPct(0);
+    if (resultStamp) {
+        resultStamp.textContent = '';
+        resultStamp.classList.add('hidden');
+        resultStamp.classList.remove('win', 'lose', 'neutral');
+    }
+    const mainCard = document.getElementById('mainCard');
+    if (mainCard) {
+        mainCard.classList.remove('win-glow', 'lose-glow', 'neutral-glow', 'dir-up', 'dir-down');
+    }
+    clearDirectionBorderClasses();
+}
+
+function syncMarketUi(options = {}) {
+    const { clearSignalPreview = false } = options;
+    if (!pairSelect || !timeframeSelect || !chartFrame) return;
+
+    const livePairTextDisplay = document.getElementById("pairTextDisplay");
+    const livePairFlagDisplay = document.getElementById("pairFlagDisplay");
+    const liveTfTextDisplay = document.getElementById("tfTextDisplay");
+    const pairLabel = getPairDisplayLabel(pairSelect.value);
+
+    if (livePairTextDisplay) livePairTextDisplay.textContent = pairLabel;
+    if (livePairFlagDisplay) livePairFlagDisplay.innerHTML = flagsForPair(pairSelect.value);
+    if (liveTfTextDisplay) liveTfTextDisplay.textContent = timeframeSelect.value;
+
+    if (cardPairFlags) cardPairFlags.innerHTML = flagsForPair(pairSelect.value);
+    if (metaPair) metaPair.textContent = pairLabel;
+    if (metaTf) metaTf.textContent = timeframeSelect.value;
+
+    if (clearSignalPreview && !isSignalActive) {
+        clearSignalCardPreview();
+    }
+
+    const symbol = mapToTradingViewSymbol(pairSelect.value);
+    const interval = mapTfToInterval(timeframeSelect.value);
+    chartFrame.src = `https://s.tradingview.com/widgetembed/?symbol=${encodeURIComponent(symbol)}&interval=${encodeURIComponent(interval)}&theme=dark`;
+}
+
+function onPairChange() {
+    if (!pairSelect) return;
+    syncMarketUi({ clearSignalPreview: true });
+    reconcileSignalState();
+}
+
+function onTimeframeChange() {
+    if (!pairSelect || !timeframeSelect || !chartFrame) return;
+    const liveTfTextDisplay = document.getElementById("tfTextDisplay");
+    if (liveTfTextDisplay) liveTfTextDisplay.textContent = timeframeSelect.value;
+    if (metaTf) metaTf.textContent = timeframeSelect.value;
+    const symbol = mapToTradingViewSymbol(pairSelect.value);
+    const interval = mapTfToInterval(timeframeSelect.value);
+    chartFrame.src = `https://s.tradingview.com/widgetembed/?symbol=${encodeURIComponent(symbol)}&interval=${encodeURIComponent(interval)}&theme=dark`;
+    refreshSignalButton();
+}
+
+function updateIframe() {
+    syncMarketUi({ clearSignalPreview: true });
+    refreshSignalButton();
+}
+
+function getSecondsFromTf(tf) {
+    if (tf.endsWith('s')) {
+        return parseInt(tf);
+    } else if (tf.endsWith('m')) {
+        return parseInt(tf) * 60;
+    }
+    return 60; // default 1m
+}
+
+const ACTIVE_SIGNAL_KEY = 'trade_ai_active_signal';
+
+function startSignalProgress(durationMs, startTime, onFinish) {
+    stopProgressTimer();
+
+    if (progressBar) {
+        progressBar.classList.add("is-filling");
+        progressBar.classList.remove("is-resetting");
+    }
+    setProgressPct(0);
+
+    progressTimer = setInterval(() => {
+        const elapsed = Date.now() - startTime;
+        const pct = Math.min(100, (elapsed / durationMs) * 100);
+
+        setProgressPct(pct);
+
+        if (elapsed >= durationMs) {
+            clearInterval(progressTimer);
+            progressTimer = null;
+            setProgressPct(100);
+            resetProgressSmooth(() => {
+                if (progressBar) progressBar.classList.remove("is-filling");
+                if (onFinish) onFinish();
+            });
+        }
+    }, 50);
+}
+
+function saveSignalState(state) {
+    localStorage.setItem(ACTIVE_SIGNAL_KEY, JSON.stringify(state));
+}
+
+function clearSignalState() {
+    localStorage.removeItem(ACTIVE_SIGNAL_KEY);
+}
+
+async function generateSignal() {
+    const pair = pairSelect.value;
+    const tf = timeframeSelect.value;
+
+    if (isSignalActive || getCooldownRemainingMs(pair) > 0) {
+        showCustomAlert(isSignalActive ? 'active' : 'cooldown');
+        return;
+    }
+    
+    isSignalActive = true;
+    refreshSignalButton();
+    if (statusText) statusText.textContent = translations[currentLang].searching_signal;
+    if (spinnerOverlay) spinnerOverlay.classList.remove("hidden");
+    const spinnerText = spinnerOverlay.querySelector('.spinner-text');
+    if (spinnerText) spinnerText.textContent = translations[currentLang].searching_signal;
+    
+    const pairLabel = pairSelect ? getPairDisplayLabel(pair) : pair;
+    
+    // Clear previous signal UI
+    if (pairFlags) pairFlags.textContent = "";
+    if (cardPairFlags) cardPairFlags.textContent = "";
+    if (metaPair) metaPair.textContent = "";
+    if (metaTf) metaTf.textContent = "";
+    if (metaTime) metaTime.textContent = "";
+    if (metaAcc) metaAcc.textContent = "";
+    if (metaDir) metaDir.textContent = "";
+    if (metaUntil) metaUntil.textContent = "";
+    setProgressPct(0);
+    if (progressLabel) progressLabel.textContent = '';
+    if (resultStamp) { resultStamp.textContent = ''; resultStamp.classList.add('hidden'); resultStamp.classList.remove('win','lose','neutral'); }
+    const mainCard = document.getElementById('mainCard');
+    if (mainCard) { mainCard.classList.remove('win-glow', 'lose-glow', 'neutral-glow', 'dir-up', 'dir-down'); }
+    clearDirectionBorderClasses();
+    
+    // OTC Random Logic
+    if (isOTC) {
+        setTimeout(() => {
+            if (spinnerOverlay) spinnerOverlay.classList.add("hidden");
+            
+            const randomSignal = Math.random() > 0.5 ? 'BUY' : 'SELL';
+            const randomConfidence = Math.floor(Math.random() * (92 - 75 + 1)) + 75;
+            
+            // Update UI
+            if (statusText) statusText.textContent = translations[currentLang].signal_found;
+            if (pairFlags) pairFlags.innerHTML = flagsForPair(pair);
+            if (cardPairFlags) cardPairFlags.innerHTML = flagsForPair(pair);
+            if (metaPair) metaPair.textContent = pairLabel;
+            if (metaTf) metaTf.textContent = tf;
+            if (metaTime) metaTime.textContent = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            if (metaAcc) metaAcc.textContent = `${randomConfidence}%`;
+            
+            if (metaDir) {
+                metaDir.textContent = randomSignal === 'BUY' ? translations[currentLang].up : translations[currentLang].down;
+                metaDir.classList.remove('up','down');
+                metaDir.classList.add(randomSignal === 'BUY' ? 'up' : 'down');
+                syncDirChip();
+            }
+            // Explicitly re-query
+            const dIcon = document.getElementById("dirIcon");
+            if (dIcon) {
+                dIcon.classList.remove('up','down');
+                dIcon.classList.add(randomSignal === 'BUY' ? 'up' : 'down');
+            }
+            if (dirIconUse) dirIconUse.setAttribute('href', randomSignal === 'BUY' ? '#icon-up' : '#icon-down');
+            
+            const tfSeconds = getSecondsFromTf(tf);
+            const startTime = Date.now();
+            const durationMs = Math.floor(tfSeconds * 1000);
+            setSignalCooldownUntil(startTime + durationMs, pair);
+            const untilDate = new Date(startTime + durationMs);
+            if (metaUntil) metaUntil.textContent = untilDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+            saveSignalState({
+                type: 'OTC',
+                pair: pair,
+                pairLabel: pairLabel,
+                tf: tf,
+                startTime: startTime,
+                duration: durationMs,
+                signal: randomSignal,
+                confidence: randomConfidence,
+                price: null
+            });
+
+            startSignalProgress(durationMs, startTime, () => {
+                isSignalActive = false;
+                clearSignalState();
+                syncDirectionStyles();
+                refreshSignalButton();
+            });
+            
+        }, 2000);
+        return;
+    }
+
+    try {
+        const params = new URLSearchParams({ pair, tf });
+        if (tgUser && tgUser.id) params.append('user_id', tgUser.id);
+        const resp = await fetch(`${API_URL}/run?${params.toString()}`, { method: "POST" });
+        if (!resp.ok) {
+            const err = await resp.json();
+            throw new Error(err.detail || "Request failed");
+        }
+        const result = await resp.json();
+        const data = result.data;
+        
+        // Always set random accuracy between 75 and 92 for regular signals
+        data.confidence = Math.floor(Math.random() * (92 - 75 + 1)) + 75;
+        
+        // Update UI
+        if (statusText) statusText.textContent = translations[currentLang].signal_found;
+        if (pairFlags) pairFlags.innerHTML = flagsForPair(pair);
+        if (cardPairFlags) cardPairFlags.innerHTML = flagsForPair(pair);
+        if (metaPair) metaPair.textContent = pairLabel;
+        if (metaTf) metaTf.textContent = tf;
+        if (metaTime) metaTime.textContent = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        if (metaAcc) metaAcc.textContent = (typeof data.confidence !== 'undefined') ? `${Number(data.confidence).toFixed(0)}%` : '';
+        if (metaDir) {
+            metaDir.textContent = data.signal === 'BUY' ? translations[currentLang].up : (data.signal === 'SELL' ? translations[currentLang].down : '');
+            metaDir.classList.remove('up','down');
+            if (data.signal === 'BUY') metaDir.classList.add('up');
+            if (data.signal === 'SELL') metaDir.classList.add('down');
+            syncDirChip();
+        }
+        if (dirIconUse) dirIconUse.setAttribute('href', data.signal === 'BUY' ? '#icon-up' : '#icon-down');
+
+        // Explicitly re-query to ensure we have the element
+        const dIcon = document.getElementById("dirIcon");
+        if (dIcon) {
+            dIcon.classList.remove('up','down');
+            // Force reflow
+            void dIcon.offsetWidth;
+            if (data.signal === 'BUY') dIcon.classList.add('up');
+            if (data.signal === 'SELL') dIcon.classList.add('down');
+        }
+        
+        const tfSeconds = getSecondsFromTf(tf);
+        const startTime = Date.now();
+        const durationMs = Math.floor(tfSeconds * 1000);
+        setSignalCooldownUntil(startTime + durationMs, pair);
+        
+        const untilDate = new Date(startTime + tfSeconds * 1000); // Full duration for 'until' text
+        if (metaUntil) metaUntil.textContent = untilDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+        // Save State
+        saveSignalState({
+            type: 'REGULAR',
+            pair: pair,
+            pairLabel: pairLabel,
+            tf: tf,
+            startTime: startTime,
+            duration: durationMs, // Use the checking duration
+            signal: data.signal,
+            confidence: data.confidence,
+            price: data.price,
+            id: data.id
+        });
+
+        startSignalProgress(durationMs, startTime, async () => {
+            isSignalActive = false;
+            clearSignalState();
+            syncDirectionStyles();
+            if (data.id) {
+                try {
+                    const checkResp = await fetch(`${API_URL}/signal/check?signal_id=${data.id}`, {
+                        method: 'POST'
+                    });
+                    if (checkResp.ok) {
+                        const checkData = await checkResp.json();
+                        applySignalResultUI(checkData.result);
+                    }
+                } catch (err) {
+                    console.error("Failed to check result", err);
+                }
+            }
+            
+            refreshSignalButton();
+            refreshProfileIfVisible();
+        });
+
+    } catch (e) {
+        isSignalActive = false;
+        clearSignalState();
+        clearSignalCooldown(pair);
+        if (statusText) statusText.textContent = tKey('error');
+        refreshSignalButton();
+    } finally {
+        if (spinnerOverlay) spinnerOverlay.classList.add("hidden");
+        refreshSignalButton();
+    }
+}
+
+if (pairSelect) pairSelect.addEventListener("change", onPairChange);
+if (timeframeSelect) timeframeSelect.addEventListener("change", onTimeframeChange);
+if (getSignalBtn) getSignalBtn.addEventListener("click", generateSignal);
+    // Custom Dropdown Logic
+    function initCustomDropdown(container) {
+        const select = container.querySelector('select');
+        const trigger = container.querySelector('.select-trigger');
+        if (!select || !trigger) return;
+        if (select.id === 'pair') return;
+
+        select.style.display = 'none';
+
+        // Create custom list
+        const list = document.createElement('div');
+        list.className = 'dropdown-list';
+        
+        Array.from(select.options).forEach(opt => {
+            const item = document.createElement('div');
+            item.className = 'dropdown-item';
+            // Default text content
+            item.textContent = opt.text;
+            
+            item.dataset.value = opt.value;
+            if (opt.selected) item.classList.add('selected');
+
+            item.addEventListener('click', (e) => {
+                e.stopPropagation();
+                select.value = opt.value;
+                select.dispatchEvent(new Event('change'));
+                list.classList.remove('open');
+                
+                // Update selected class
+                list.querySelectorAll('.dropdown-item').forEach(i => i.classList.remove('selected'));
+                item.classList.add('selected');
+            });
+            list.appendChild(item);
+        });
+
+        container.appendChild(list);
+
+        // Toggle list
+        trigger.addEventListener('click', (e) => {
+            e.stopPropagation();
+            // Close others
+            document.querySelectorAll('.dropdown-list').forEach(l => {
+                if (l !== list) l.classList.remove('open');
+            });
+            list.classList.toggle('open');
+        });
+    }
+
+    function initCustomDropdowns() {
+        // Native check removed to force custom dropdowns on all devices
+        // const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+        // if (isIOS) return; 
+
+        document.querySelectorAll('.custom-select').forEach(container => {
+            initCustomDropdown(container);
+        });
+
+        // Close on outside click
+        document.addEventListener('click', () => {
+            document.querySelectorAll('.dropdown-list').forEach(l => l.classList.remove('open'));
+        });
+    }
+
+function restoreActiveSignal(options = {}) {
+    const stored = localStorage.getItem(ACTIVE_SIGNAL_KEY);
+    if (!stored) return;
+    
+    try {
+        const state = JSON.parse(stored);
+        const elapsed = Date.now() - state.startTime;
+
+        if (options.fromPairSwitch && pairSelect && normalizePairKey(pairSelect.value) !== normalizePairKey(state.pair)) {
+            return;
+        }
+        
+        if (elapsed >= state.duration) {
+            clearSignalState();
+            isSignalActive = false;
+            stopProgressTimer();
+            setProgressPct(0);
+            syncDirectionStyles();
+            return;
+        }
+        
+        if (!getSignalBtn || !progressBar) return;
+        
+        isSignalActive = true;
+        setSignalCooldownUntil(state.startTime + state.duration, state.pair);
+        refreshSignalButton();
+        
+        const mode = state.type === 'OTC' ? 'OTC' : 'Regular';
+        setMarketMode(mode, { skipReconcile: true });
+
+        if (pairSelect) {
+            pairSelect.value = state.pair;
+        }
+        if (timeframeSelect) timeframeSelect.value = state.tf;
+
+        updatePairTriggerDisplay();
+        renderPairModalList();
+        syncMarketUi();
+        
+        // Restore UI Texts (Meta)
+        const pairLabel = state.pairLabel || state.pair;
+        if (statusText) statusText.textContent = translations[currentLang].signal_found;
+        if (pairFlags) pairFlags.innerHTML = flagsForPair(state.pair);
+        if (cardPairFlags) cardPairFlags.innerHTML = flagsForPair(state.pair);
+        if (metaPair) metaPair.textContent = pairLabel;
+        if (metaTf) metaTf.textContent = state.tf;
+        if (metaTime) metaTime.textContent = new Date(state.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        if (metaAcc) metaAcc.textContent = (typeof state.confidence !== 'undefined') ? `${Number(state.confidence).toFixed(0)}%` : '';
+        
+        if (metaDir) {
+            metaDir.textContent = state.signal === 'BUY' ? translations[currentLang].up : (state.signal === 'SELL' ? translations[currentLang].down : '');
+            metaDir.classList.remove('up','down');
+            if (state.signal === 'BUY') metaDir.classList.add('up');
+            if (state.signal === 'SELL') metaDir.classList.add('down');
+            syncDirChip();
+        }
+        if (dirIcon) {
+            dirIcon.classList.remove('up','down');
+            if (state.signal === 'BUY') dirIcon.classList.add('up');
+            if (state.signal === 'SELL') dirIcon.classList.add('down');
+        }
+        if (dirIconUse) dirIconUse.setAttribute('href', state.signal === 'BUY' ? '#icon-up' : '#icon-down');
+        
+        // Restore Until Time
+        const tfSeconds = getSecondsFromTf(state.tf);
+        const untilDate = new Date(state.startTime + tfSeconds * 1000);
+        if (metaUntil) metaUntil.textContent = untilDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        
+        // Resume Progress
+        startSignalProgress(state.duration, state.startTime, async () => {
+            isSignalActive = false;
+            clearSignalState();
+            syncDirectionStyles();
+            
+            if (state.type === 'OTC') {
+                refreshSignalButton();
+            } else {
+                // Regular result check
+                if (state.id) {
+                    try {
+                        const checkResp = await fetch(`${API_URL}/signal/check?signal_id=${state.id}`, {
+                            method: 'POST'
+                        });
+                        if (checkResp.ok) {
+                            const checkData = await checkResp.json();
+                            applySignalResultUI(checkData.result);
+                        }
+                    } catch (err) {
+                        console.error("Failed to check result", err);
+                    }
+                }
+                refreshSignalButton();
+                refreshProfileIfVisible();
+            }
+        });
+        
+    } catch (e) {
+        console.error("Failed to restore signal", e);
+        clearSignalState();
+        refreshSignalButton();
+    }
+}
+
+// Initialize
+initCustomDropdowns();
+updatePairTriggerDisplay();
+renderPairModalList();
+updateIframe();
+changeLanguage(currentLang);
+restoreActiveSignal();
+initCooldownFromStorage();
+onAppResume();
+
+document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') {
+        onAppResume();
+    }
+});
+
+const tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+if (tg) {
+    try {
+        tg.ready();
+        tg.expand();
+        // Request full screen if available
+        if (tg.requestFullscreen) {
             tg.requestFullscreen();
-        } catch (_) {
-            /* older Telegram clients */
+        }
+        let u = tg.initDataUnsafe && tg.initDataUnsafe.user ? tg.initDataUnsafe.user : null;
+        if (!u && tg.initData) {
+            try {
+                const params = new URLSearchParams(tg.initData);
+                const userRaw = params.get('user');
+                if (userRaw) u = JSON.parse(userRaw);
+            } catch (_) {}
+        }
+        if (u) {
+            tgUser = u;
+            if (userInfo) {
+                userInfo.textContent = [u.first_name, u.last_name].filter(Boolean).join(" ") || u.username || `ID ${u.id}`;
+            }
+            fetch(`${API_URL}/profile`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    id: u.id,
+                    username: u.username,
+                    first_name: u.first_name,
+                    last_name: u.last_name,
+                    language_code: u.language_code,
+                    is_premium: u.is_premium,
+                }),
+            }).catch(() => {});
+            
+            updateUserAvatar(u);
+        }
+    } catch (_) {}
+}
+
+function updateUserAvatar(u) {
+    const name = [u.first_name, u.last_name].filter(Boolean).join(" ") || u.username || `ID ${u.id}`;
+    const fallback = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=0b1220&color=bae6fd&size=128`;
+    const src = u.photo_url
+        || (u.username ? `https://unavatar.io/telegram/${u.username}` : fallback);
+
+    [userAvatar, profileAvatar].forEach((img) => {
+        if (!img) return;
+        img.src = src;
+        img.alt = name;
+        img.onerror = () => {
+            img.src = fallback;
+        };
+    });
+}
+
+function updateBackButton() {
+    if (!tg || !tg.BackButton) return;
+    if (currentView === "profile") {
+        tg.BackButton.show();
+    } else {
+        tg.BackButton.hide();
+    }
+}
+
+function switchView(view) {
+    if (view !== "home" && view !== "profile") return;
+    currentView = view;
+
+    if (homeView) homeView.classList.toggle("hidden", view !== "home");
+    if (profileView) profileView.classList.toggle("hidden", view !== "profile");
+
+    document.querySelectorAll(".bottom-nav .nav-item").forEach((item) => {
+        item.classList.toggle("active", item.getAttribute("data-view") === view);
+    });
+
+    if (view === "profile") {
+        loadProfilePage();
+    }
+
+    updateBackButton();
+}
+
+document.querySelectorAll(".bottom-nav .nav-item").forEach((item) => {
+    item.addEventListener("click", () => {
+        const view = item.getAttribute("data-view");
+        if (view) switchView(view);
+    });
+});
+
+if (tg && tg.BackButton) {
+    tg.BackButton.onClick(() => {
+        if (currentView === "profile") switchView("home");
+    });
+}
+updateBackButton();
+
+// Language Modal Logic
+function showLangModal() {
+    if (langModal) {
+        langModal.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+    }
+}
+
+function hideLangModal() {
+    if (langModal) {
+        langModal.classList.add('hidden');
+        document.body.style.overflow = '';
+    }
+}
+
+function showCustomAlert(reason = 'active') {
+    const descEl = alertModal?.querySelector('.alert-desc');
+    if (descEl) {
+        if (reason === 'cooldown') {
+            descEl.textContent = `${tKey('alert_cooldown_desc')} ${formatCooldownButton(getCooldownRemainingMs())}.`;
+        } else {
+            descEl.textContent = tKey('alert_desc');
         }
     }
-
-    if (typeof tg.disableVerticalSwipes === "function") {
-        tg.disableVerticalSwipes();
+    if (alertModal) {
+        alertModal.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
     }
+}
 
-    if (typeof tg.setHeaderColor === "function") {
-        tg.setHeaderColor("#0a0a0f");
+function hideCustomAlert() {
+    const descEl = alertModal?.querySelector('.alert-desc');
+    if (descEl) {
+        descEl.setAttribute('data-i18n', 'alert_desc');
+        descEl.textContent = tKey('alert_desc');
     }
-    if (typeof tg.setBackgroundColor === "function") {
-        tg.setBackgroundColor("#0a0a0f");
+    if (alertModal) {
+        alertModal.classList.add('hidden');
+        document.body.style.overflow = '';
     }
+}
 
-    document.documentElement.classList.add("tg-webapp");
-
-    const applyViewport = () => {
-        const height = tg.viewportStableHeight || tg.viewportHeight;
-        if (height) {
-            document.documentElement.style.setProperty("--app-height", height + "px");
+function changeLanguage(lang) {
+    if (!translations[lang]) return;
+    currentLang = lang;
+    localStorage.setItem('trade_ai_lang', lang);
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (translations[lang][key]) {
+            el.textContent = translations[lang][key];
         }
+    });
+    document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+        const key = el.getAttribute('data-i18n-placeholder');
+        if (translations[lang][key]) {
+            el.setAttribute('placeholder', translations[lang][key]);
+        }
+    });
+
+    updateLangBtnFlag(lang);
+    refreshSignalButton();
+    
+    document.querySelectorAll('.lang-item').forEach(item => {
+        if (item.getAttribute('data-lang') === lang) {
+            item.classList.add('selected');
+        } else {
+            item.classList.remove('selected');
+        }
+    });
+}
+
+if (langBtn) langBtn.addEventListener('click', showLangModal);
+if (closeLangBtn) closeLangBtn.addEventListener('click', hideLangModal);
+if (langModal) langModal.addEventListener('click', (e) => { if (e.target === langModal) hideLangModal(); });
+
+if (pairSelectTrigger) pairSelectTrigger.addEventListener('click', showPairModal);
+if (closePairBtn) closePairBtn.addEventListener('click', hidePairModal);
+if (pairModal) pairModal.addEventListener('click', (e) => { if (e.target === pairModal) hidePairModal(); });
+if (pairSearchInput) {
+    pairSearchInput.addEventListener('input', (e) => filterPairModalList(e.target.value));
+    pairSearchInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') hidePairModal();
+    });
+}
+
+if (closeAlertBtn) closeAlertBtn.addEventListener('click', hideCustomAlert);
+if (alertModal) alertModal.addEventListener('click', (e) => { if (e.target === alertModal) hideCustomAlert(); });
+
+document.querySelectorAll('.lang-item').forEach(item => {
+    item.addEventListener('click', () => {
+        document.querySelectorAll('.lang-item').forEach(i => i.classList.remove('selected'));
+        item.classList.add('selected');
+        const langCode = item.getAttribute('data-lang');
+        changeLanguage(langCode);
+        hideLangModal();
+    });
+});
+
+// header profile button removed per mobile design
+
+const profileRoot = document.getElementById('profileRoot');
+let currentHistoryPeriod = 'today';
+
+function applySignalResultUI(resultStatus) {
+    const key = resultStatus.toLowerCase();
+    if (resultStamp) {
+        resultStamp.textContent = tKey(key);
+        resultStamp.classList.remove('hidden', 'win', 'lose', 'neutral');
+        resultStamp.classList.add(key);
+    }
+    const mainCard = document.getElementById('mainCard');
+    if (mainCard) {
+        mainCard.classList.remove('win-glow', 'lose-glow', 'neutral-glow', 'dir-up', 'dir-down');
+        mainCard.classList.add(`${key}-glow`);
+        syncDirectionStyles();
+    }
+}
+
+function refreshProfileIfVisible() {
+    if (currentView === 'profile') loadProfilePage();
+}
+
+function formatHistoryTimestamp(ts) {
+    if (!ts) return '';
+    const d = new Date(String(ts).replace(' ', 'T'));
+    if (Number.isNaN(d.getTime())) return ts;
+    return d.toLocaleString([], { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
+}
+
+function getHistoryResultMeta(result) {
+    if (!result) return { className: 'pending', label: tKey('history_active') };
+    const key = String(result).toLowerCase();
+    if (key === 'win' || key === 'lose' || key === 'neutral') {
+        return { className: key, label: tKey(key) };
+    }
+    return { className: 'pending', label: result };
+}
+
+function setProfileStatsLoading() {
+    const totalEl = document.getElementById('totalSignals');
+    const winCountEl = document.getElementById('winCount');
+    const winRateEl = document.getElementById('winRate');
+    if (totalEl) totalEl.textContent = '0';
+    if (winCountEl) winCountEl.textContent = '0';
+    if (winRateEl) winRateEl.textContent = '0%';
+}
+
+async function loadProfilePage() {
+    if (!profileRoot) return;
+
+    if (!profileTabsInitialized) {
+        profileTabsInitialized = true;
+        const tabs = document.querySelectorAll('.filter-tab');
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                tabs.forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                currentHistoryPeriod = tab.getAttribute('data-period');
+                fetchHistory();
+            });
+        });
+    }
+
+    const uName = document.getElementById('profileName');
+    const uSub = document.getElementById('userSubtitle');
+
+    if (tgUser) {
+        const fullName = [tgUser.first_name, tgUser.last_name].filter(Boolean).join(' ') || 'User';
+        if (uName) uName.textContent = fullName;
+        if (uSub) {
+            uSub.textContent = tgUser.username ? `@${tgUser.username}` : '@username';
+        }
+        updateUserAvatar(tgUser);
+        setProfileStatsLoading();
+
+        try {
+            const s = await fetch(`${API_URL}/stats/user?uid=${tgUser.id}`);
+            if (s.ok) {
+                const stats = await s.json();
+                const totalEl = document.getElementById('totalSignals');
+                const winCountEl = document.getElementById('winCount');
+                const winRateEl = document.getElementById('winRate');
+                if (totalEl) totalEl.textContent = String(stats.total_signals ?? 0);
+                if (winCountEl) winCountEl.textContent = String(stats.wins ?? 0);
+                if (winRateEl) winRateEl.textContent = `${stats.win_rate ?? 0}%`;
+            }
+        } catch (_) {}
+
+        await fetchHistory();
+    } else {
+        if (uName) uName.textContent = 'Guest';
+        if (uSub) uSub.textContent = '@username';
+        setProfileStatsLoading();
+        const container = document.getElementById('historyList');
+        if (container) {
+            container.innerHTML = `<div class="profile-guest-hint">${tKey('profile_guest')}</div>`;
+        }
+    }
+}
+
+async function fetchHistory() {
+    const container = document.getElementById('historyList');
+    if (!tgUser || !container) return;
+
+    container.innerHTML = `<div class="profile-loading">${tKey('history_loading')}</div>`;
+
+    try {
+        const h = await fetch(`${API_URL}/history/user?uid=${tgUser.id}&limit=50&period=${currentHistoryPeriod}`);
+        if (h.ok) {
+            const rows = await h.json();
+            renderHistoryCards(rows);
+        } else {
+            container.innerHTML = `<div class="profile-empty">${tKey('history_empty')}</div>`;
+        }
+    } catch (_) {
+        container.innerHTML = `<div class="profile-empty">${tKey('history_empty')}</div>`;
+    }
+}
+
+function renderHistoryCards(rows) {
+    const container = document.getElementById('historyList');
+    if (!container) return;
+    
+    if (!rows.length) {
+        container.innerHTML = `<div class="profile-empty">${tKey('history_empty')}</div>`;
+        return;
+    }
+
+    container.innerHTML = rows.map(r => {
+        const { className: resClass, label: resText } = getHistoryResultMeta(r.result);
+        const pairLabel = getPairDisplayLabel(r.pair);
+        const dirClass = r.signal === 'SELL' ? 'sell' : 'buy';
+        const dirLabel = r.signal === 'SELL' ? tKey('down') : tKey('up');
+
+        return `
+        <article class="history-card">
+            <div class="hc-top">${formatHistoryTimestamp(r.timestamp)}</div>
+            <div class="hc-main">
+                <div class="hc-pair-info">
+                    <span class="hc-flags">${flagsForPair(r.pair)}</span>
+                    <span class="hc-pair-name">${pairLabel}</span>
+                </div>
+                <div class="hc-center">
+                    <span class="hc-tf">${r.timeframe || '—'}</span>
+                    <span class="hc-dir ${dirClass}">${dirLabel}</span>
+                </div>
+                <div class="hc-status ${resClass}">${resText}</div>
+            </div>
+        </article>
+        `;
+    }).join('');
+}
+
+// Helper for flags (reusing existing logic if available or duplicating slightly for safety)
+// Assuming flagsForPair is globally available from earlier script content.
+// If not, I'll ensure it is.
+// Based on previous reads, flagsForPair is defined in global scope.
+
+function getCurrencyCountryCode(cur) {
+    const m = {
+        EUR: 'eu', USD: 'us', GBP: 'gb', JPY: 'jp', CHF: 'ch', CAD: 'ca', AUD: 'au', NZD: 'nz'
     };
+    return m[cur] || null;
+}
 
-    const applySafeArea = () => {
-        const inset = tg.safeAreaInset;
-        const contentInset = tg.contentSafeAreaInset;
-        if (inset) {
-            document.documentElement.style.setProperty("--safe-top", inset.top + "px");
-            document.documentElement.style.setProperty("--safe-bottom", inset.bottom + "px");
-            document.documentElement.style.setProperty("--safe-left", inset.left + "px");
-            document.documentElement.style.setProperty("--safe-right", inset.right + "px");
-        }
-        if (contentInset) {
-            document.documentElement.style.setProperty("--tg-content-safe-top", contentInset.top + "px");
-            document.documentElement.style.setProperty(
-                "--tg-content-safe-bottom",
-                contentInset.bottom + "px"
-            );
-        }
-    };
-
-    applyViewport();
-    applySafeArea();
-    tg.onEvent("viewportChanged", applyViewport);
-    if (typeof tg.onEvent === "function") {
-        tg.onEvent("safeAreaChanged", applySafeArea);
-        tg.onEvent("contentSafeAreaChanged", applySafeArea);
+function flagsForPair(pair) {
+    // Clean pair string from OTC suffix
+    const cleanPair = pair.replace(' OTC', '');
+    const base = cleanPair.slice(0,3);
+    const quote = cleanPair.slice(3,6);
+    const baseCode = getCurrencyCountryCode(base);
+    const quoteCode = getCurrencyCountryCode(quote);
+    
+    if (baseCode && quoteCode) {
+        return `
+        <div class="pair-icons">
+            ${flagImgTag(baseCode, "currency-icon base", base)}
+            ${flagImgTag(quoteCode, "currency-icon quote", quote)}
+        </div>
+        `;
     }
+    // Fallback to emojis if not found
+    return `${flagForCurrency(base)} ${flagForCurrency(quote)}`.trim();
 }
 
-function refreshAppLanguage() {
-    updatePairsScreenHeader();
-    renderPairsList();
-    renderTimeframes();
-    renderScreenshotTimeframes();
-    updateSignalCooldownUI();
-    if (currentSignal) renderSignal();
-    const activeEdu = document.querySelector("#eduCategory .edu-tab.active");
-    renderEducation(activeEdu?.dataset.cat || "all");
-    const activeLb = document.querySelector("#lbTabs .lb-tab.active");
-    renderLeaderboard(activeLb?.dataset.period || "today");
-    renderFaq();
-}
-
-window.refreshAppLanguage = refreshAppLanguage;
-
-function init() {
-    initI18n();
-    initTelegramWebApp();
-    bindEvents();
-    renderPairsList();
-    renderTimeframes();
-    renderScreenshotTimeframes();
-    renderEducation("all");
-    renderLeaderboard("today");
-    renderFaq();
-}
-
-if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", init);
-} else {
-    init();
+function flagForCurrency(cur) {
+    const m = {
+        EUR: '🇪🇺', USD: '🇺🇸', GBP: '🇬🇧', JPY: '🇯🇵', CHF: '🇨🇭', CAD: '🇨🇦', AUD: '🇦🇺', NZD: '🇳🇿'
+    };
+    return m[cur] || '';
 }

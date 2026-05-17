@@ -156,7 +156,10 @@ const translations = {
         alert_cooldown_desc: "Новый сигнал будет доступен через",
         cooldown_status: "Кулдаун",
         cooldown_btn: "Подождите",
-        alert_btn_got_it: "Понятно"
+        alert_btn_got_it: "Понятно",
+        market_closed_btn: "Откроется",
+        market_closed_status: "Рынок Forex закрыт",
+        market_closed_alert: "В выходные рынок Forex не торгуется. Сигнал будет доступен после открытия."
     },
     en: {
         select_language: "Select Language",
@@ -206,7 +209,10 @@ const translations = {
         alert_cooldown_desc: "Next signal available in",
         cooldown_status: "Cooldown",
         cooldown_btn: "Wait",
-        alert_btn_got_it: "Got it"
+        alert_btn_got_it: "Got it",
+        market_closed_btn: "Opens",
+        market_closed_status: "Forex market is closed",
+        market_closed_alert: "Forex is closed on weekends. Signals will be available when trading resumes."
     },
     uz: {
         select_language: "Tilni tanlang",
@@ -355,6 +361,78 @@ function tKey(key) {
     return translations[currentLang][key] || translations.en[key] || key;
 }
 
+/** Forex: closed Fri 22:00 UTC → Sun 22:00 UTC (weekend). */
+const FOREX_CLOSE_UTC_HOUR = 22;
+
+function isForexMarketOpen(now = new Date()) {
+    const day = now.getUTCDay();
+    const mins = now.getUTCHours() * 60 + now.getUTCMinutes();
+    const closeMins = FOREX_CLOSE_UTC_HOUR * 60;
+    if (day === 5 && mins >= closeMins) return false;
+    if (day === 6) return false;
+    if (day === 0 && mins < closeMins) return false;
+    return true;
+}
+
+function getNextForexOpenDate(now = new Date()) {
+    if (isForexMarketOpen(now)) return null;
+
+    const open = new Date(
+        Date.UTC(
+            now.getUTCFullYear(),
+            now.getUTCMonth(),
+            now.getUTCDate(),
+            FOREX_CLOSE_UTC_HOUR,
+            0,
+            0,
+            0
+        )
+    );
+    const day = now.getUTCDay();
+    const hour = now.getUTCHours();
+
+    if (day === 5 && hour >= FOREX_CLOSE_UTC_HOUR) {
+        open.setUTCDate(open.getUTCDate() + 2);
+    } else if (day === 6) {
+        open.setUTCDate(open.getUTCDate() + 1);
+    } else if (day === 0 && hour < FOREX_CLOSE_UTC_HOUR) {
+        /* same Sunday */
+    } else {
+        const daysUntilSunday = (7 - day) % 7 || 7;
+        open.setUTCDate(open.getUTCDate() + daysUntilSunday);
+    }
+    return open;
+}
+
+function formatMarketOpenDate(date) {
+    const locale =
+        currentLang === "ru" ? "ru-RU"
+        : currentLang === "uz" ? "uz-UZ"
+        : currentLang === "hi" ? "hi-IN"
+        : currentLang === "pt" ? "pt-BR"
+        : currentLang === "ar" ? "ar-SA"
+        : currentLang === "kz" ? "kk-KZ"
+        : "en-GB";
+    return date.toLocaleString(locale, {
+        weekday: "short",
+        day: "numeric",
+        month: "short",
+        hour: "2-digit",
+        minute: "2-digit",
+    });
+}
+
+function isForexModeClosed() {
+    return !isOTC && !isForexMarketOpen();
+}
+
+let marketCheckInterval = null;
+
+function ensureMarketTicker() {
+    if (marketCheckInterval) return;
+    marketCheckInterval = setInterval(() => refreshSignalButton(), 30000);
+}
+
 function normalizePairKey(pair) {
     return String(pair || '').trim();
 }
@@ -459,6 +537,22 @@ function refreshSignalButton() {
     if (!getSignalBtn) return;
     const span = getSignalBtnLabel();
     const cd = getCooldownRemainingMs();
+
+    getSignalBtn.classList.remove("is-market-closed");
+
+    if (isForexModeClosed()) {
+        getSignalBtn.disabled = true;
+        getSignalBtn.classList.add("is-market-closed");
+        const openAt = getNextForexOpenDate();
+        if (span) {
+            span.textContent = openAt
+                ? `${tKey("market_closed_btn")} ${formatMarketOpenDate(openAt)}`
+                : tKey("market_closed_status");
+        }
+        if (statusText) statusText.textContent = tKey("market_closed_status");
+        ensureMarketTicker();
+        return;
+    }
 
     if (cd > 0) {
         getSignalBtn.disabled = true;
@@ -1060,6 +1154,11 @@ async function generateSignal() {
     const pair = pairSelect.value;
     const tf = timeframeSelect.value;
 
+    if (isForexModeClosed()) {
+        showCustomAlert("market_closed");
+        return;
+    }
+
     if (isSignalActive || getCooldownRemainingMs(pair) > 0) {
         showCustomAlert(isSignalActive ? 'active' : 'cooldown');
         return;
@@ -1425,6 +1524,8 @@ updateIframe();
 changeLanguage(currentLang);
 restoreActiveSignal();
 initCooldownFromStorage();
+ensureMarketTicker();
+refreshSignalButton();
 onAppResume();
 
 document.addEventListener('visibilitychange', () => {
@@ -1547,10 +1648,19 @@ function hideLangModal() {
 
 function showCustomAlert(reason = 'active') {
     const descEl = alertModal?.querySelector('.alert-desc');
+    const titleEl = alertModal?.querySelector('.alert-title');
     if (descEl) {
         if (reason === 'cooldown') {
+            if (titleEl) titleEl.textContent = tKey('alert_title');
             descEl.textContent = `${tKey('alert_cooldown_desc')} ${formatCooldownButton(getCooldownRemainingMs())}.`;
+        } else if (reason === 'market_closed') {
+            const openAt = getNextForexOpenDate();
+            if (titleEl) titleEl.textContent = tKey('market_closed_status');
+            descEl.textContent = openAt
+                ? `${tKey('market_closed_alert')} ${tKey('market_closed_btn')} ${formatMarketOpenDate(openAt)}.`
+                : tKey('market_closed_alert');
         } else {
+            if (titleEl) titleEl.textContent = tKey('alert_title');
             descEl.textContent = tKey('alert_desc');
         }
     }
@@ -1562,6 +1672,11 @@ function showCustomAlert(reason = 'active') {
 
 function hideCustomAlert() {
     const descEl = alertModal?.querySelector('.alert-desc');
+    const titleEl = alertModal?.querySelector('.alert-title');
+    if (titleEl) {
+        titleEl.setAttribute('data-i18n', 'alert_title');
+        titleEl.textContent = tKey('alert_title');
+    }
     if (descEl) {
         descEl.setAttribute('data-i18n', 'alert_desc');
         descEl.textContent = tKey('alert_desc');
